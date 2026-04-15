@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Solar Load Split icon</title>
+  <desc id="desc">Solar and grid power split into one load.</desc>
+  <rect width="256" height="256" rx="44" fill="#f7fafc"/>
+  <circle cx="76" cy="66" r="26" fill="#f6b42a"/>
+  <g fill="none" stroke="#f6b42a" stroke-linecap="round" stroke-width="9">
+    <path d="M76 20v16"/>
+    <path d="M76 96v16"/>
+    <path d="M30 66h16"/>
+    <path d="M106 66h16"/>
+  </g>
+  <path fill="#158978" d="M34 126h78l20 66H20l14-66Z"/>
+  <g fill="none" stroke="#d7fff8" stroke-linecap="round" stroke-width="4" opacity=".8">
+    <path d="M56 126 45 192"/>
+    <path d="M82 126v66"/>
+    <path d="M24 158h100"/>
+  </g>
+  <g fill="none" stroke="#536676" stroke-linecap="round" stroke-linejoin="round" stroke-width="9">
+    <path d="M178 76v116"/>
+    <path d="M150 192h56"/>
+    <path d="M154 108h48"/>
+    <path d="M144 138h68"/>
+    <path d="m154 108 24-32 24 32"/>
+    <path d="m154 108 52 84"/>
+    <path d="m202 108-52 84"/>
+  </g>
+  <path fill="none" stroke="#1fb6a6" stroke-linecap="round" stroke-width="10" d="M105 168c18 0 24 20 37 20"/>
+  <path fill="none" stroke="#6d7f91" stroke-linecap="round" stroke-width="10" d="M178 168c-18 0-24 20-37 20"/>
+  <path fill="#22a75d" d="M112 190h60a12 12 0 0 1 12 12v24H100v-24a12 12 0 0 1 12-12Z"/>
+  <path fill="#fff" d="m148 198-22 30h17l-5 22 24-32h-18l4-20Z"/>
+</svg>

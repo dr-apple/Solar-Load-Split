@@ -3,17 +3,25 @@
     "step": {
       "user": {
         "title": "Solar Load Split",
-        "description": "Split a device's consumption into solar-supplied power and grid-supplied power.",
+        "description": "Choose the grid import/export power sensor once. Solar Load Split will use it to discover matching device power sensors.",
         "data": {
           "name": "Name",
-          "device_power": "Device power sensor",
           "grid_power": "Grid power sensor",
           "invert_grid": "Invert grid sign"
+        }
+      },
+      "discovery_confirm": {
+        "title": "Solar Load Split discovered power sensors",
+        "description": "Home Assistant found a device power sensor that may fit Solar Load Split. Check the suggestion and adjust it if needed.",
+        "data": {
+          "name": "Name",
+          "device_power": "Device power sensor"
         }
       }
     },
     "abort": {
-      "already_configured": "This device and grid sensor pair is already configured."
+      "already_configured": "This device and grid sensor pair is already configured.",
+      "discovery_missing": "The discovered sensor information is no longer available."
     }
   },
   "entity": {

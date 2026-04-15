@@ -1,5 +1,7 @@
 # Solar Load Split
 
+![Solar Load Split logo](logo.svg)
+
 Home Assistant custom integration that splits one device's power usage into:
 
 - Solar-supplied power and energy
@@ -12,16 +14,20 @@ It is designed for UI setup only through Home Assistant's config flow. No YAML s
 ```text
 .
 ├── hacs.json
+├── logo.svg
 ├── README.md
 └── custom_components/
     └── pv_device_split/
         ├── __init__.py
         ├── config_flow.py
         ├── const.py
+        ├── discovery.py
+        ├── icon.svg
         ├── manifest.json
         ├── sensor.py
         ├── strings.json
         └── translations/
+            ├── de.json
             └── en.json
 ```
 
@@ -43,14 +49,37 @@ It is designed for UI setup only through Home Assistant's config flow. No YAML s
 
 ## Configuration
 
-The setup flow asks for:
+The first setup flow asks for:
 
-- `device_power`: the device's power sensor in W
 - `grid_power`: the grid power sensor in W
 - `invert_grid`: optional boolean for meters where export/import signs are reversed
 
+After this base entry exists, Solar Load Split searches for device power
+sensors and offers discovered device entries. Each discovered device entry asks
+for:
+
+- `device_power`: the device's power sensor in W
+
 The setup flow and entity names are translated for English and German Home Assistant
 installations.
+
+## Discovery
+
+Solar Load Split first needs one manually configured base entry with the grid
+import/export sensor. It then scans existing `sensor` entities for device power
+sensors using `device_class: power` or power units such as `W` and `kW`.
+
+Grid-like sensors are skipped as device candidates when their entity ID or
+friendly name contains common names such as `grid`, `netz`, `meter`, `utility`,
+`einspeis`, or `bezug`.
+
+When a likely device sensor is found, Home Assistant can show Solar Load Split
+as a discovered integration. The discovered form is prefilled with the suggested
+device entity, but the user can still change it before creating the integration.
+
+Home Assistant only runs code for integrations it has loaded. After installation
+through HACS, restart Home Assistant and create the first Solar Load Split entry
+with the grid sensor. The discovery scan runs from that loaded base entry.
 
 Grid convention after optional inversion:
 

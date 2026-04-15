@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Solar Load Split</title>
+  <desc id="desc">A split energy symbol showing solar power and grid power feeding one load.</desc>
+  <defs>
+    <linearGradient id="sun" x1="120" x2="220" y1="86" y2="206" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffd84d"/>
+      <stop offset="1" stop-color="#f6a623"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="80" x2="228" y1="248" y2="390" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1fb6a6"/>
+      <stop offset="1" stop-color="#126d7a"/>
+    </linearGradient>
+    <linearGradient id="grid" x1="300" x2="436" y1="158" y2="392" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8aa0b6"/>
+      <stop offset="1" stop-color="#425466"/>
+    </linearGradient>
+    <linearGradient id="load" x1="182" x2="330" y1="326" y2="456" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#45c96f"/>
+      <stop offset="1" stop-color="#18884f"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="72" fill="#f7fafc"/>
+  <path fill="#e8eef5" d="M72 416h368a24 24 0 0 1 24 24v0a24 24 0 0 1-24 24H72a24 24 0 0 1-24-24v0a24 24 0 0 1 24-24Z"/>
+
+  <circle cx="154" cy="148" r="52" fill="url(#sun)"/>
+  <g fill="none" stroke="#f6a623" stroke-linecap="round" stroke-width="18">
+    <path d="M154 48v32"/>
+    <path d="M154 216v32"/>
+    <path d="M54 148h32"/>
+    <path d="M222 148h32"/>
+    <path d="m83 77 23 23"/>
+    <path d="m202 196 23 23"/>
+    <path d="m225 77-23 23"/>
+    <path d="m106 196-23 23"/>
+  </g>
+
+  <g transform="translate(70 244)">
+    <path fill="url(#panel)" d="M24 0h142l38 128H0L24 0Z"/>
+    <g fill="none" stroke="#d7fff8" stroke-linecap="round" stroke-width="8" opacity=".75">
+      <path d="M49 0 28 128"/>
+      <path d="M94 0 88 128"/>
+      <path d="M139 0 148 128"/>
+      <path d="M12 42h180"/>
+      <path d="M2 84h202"/>
+    </g>
+    <path fill="#126d7a" d="M76 128h52v48H76z"/>
+  </g>
+
+  <g fill="none" stroke="url(#grid)" stroke-linecap="round" stroke-linejoin="round" stroke-width="16">
+    <path d="M356 164v252"/>
+    <path d="M302 416h108"/>
+    <path d="M318 220h76"/>
+    <path d="M294 276h124"/>
+    <path d="M320 220 356 164l38 56"/>
+    <path d="M318 220 418 416"/>
+    <path d="M394 220 302 416"/>
+  </g>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="18">
+    <path stroke="#1fb6a6" d="M188 326c34 0 44 40 68 40"/>
+    <path stroke="#6d7f91" d="M356 326c-34 0-44 40-68 40"/>
+    <path stroke="#45c96f" d="M256 366v34"/>
+  </g>
+
+  <path fill="url(#load)" d="M214 388h84a20 20 0 0 1 20 20v44H194v-44a20 20 0 0 1 20-20Z"/>
+  <path fill="#ffffff" d="m264 402-36 50h28l-8 36 38-52h-28l6-34Z"/>
+</svg>
