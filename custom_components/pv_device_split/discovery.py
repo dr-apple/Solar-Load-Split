@@ -51,10 +51,7 @@ def async_schedule_power_discovery(hass: HomeAssistant) -> None:
 
 
 async def _async_discover_power_pair(hass: HomeAssistant) -> None:
-    """Start a discovery flow when a likely device/grid pair exists."""
-    if _has_discovery_flow_in_progress(hass):
-        return
-
+    """Start discovery flows for likely device/grid pairs."""
     grid_entries = _grid_entries(hass)
     if not grid_entries:
         return
@@ -71,9 +68,16 @@ async def _async_discover_power_pair(hass: HomeAssistant) -> None:
             if _is_configured(hass, device_candidate.entity_id, grid_power):
                 continue
 
+            unique_id = _pair_unique_id(device_candidate.entity_id, grid_power)
+            if _discovery_flow_in_progress(hass, unique_id):
+                continue
+
             await hass.config_entries.flow.async_init(
                 DOMAIN,
-                context={"source": config_entries.SOURCE_DISCOVERY},
+                context={
+                    "source": config_entries.SOURCE_DISCOVERY,
+                    "unique_id": unique_id,
+                },
                 data={
                     CONF_NAME: _suggest_name(device_candidate),
                     CONF_DEVICE_POWER: device_candidate.entity_id,
@@ -81,7 +85,6 @@ async def _async_discover_power_pair(hass: HomeAssistant) -> None:
                     CONF_INVERT_GRID: grid_entry.data.get(CONF_INVERT_GRID, False),
                 },
             )
-            return
 
 
 @callback
@@ -120,10 +123,14 @@ def _grid_entries(hass: HomeAssistant) -> list[config_entries.ConfigEntry]:
 
 
 @callback
-def _has_discovery_flow_in_progress(hass: HomeAssistant) -> bool:
-    """Return whether a discovery flow is already in progress."""
+def _discovery_flow_in_progress(hass: HomeAssistant, unique_id: str) -> bool:
+    """Return whether a discovery flow for the pair is already in progress."""
     for flow in hass.config_entries.flow.async_progress_by_handler(DOMAIN):
-        if flow["context"].get("source") == config_entries.SOURCE_DISCOVERY:
+        context = flow.get("context", {})
+        if (
+            context.get("source") == config_entries.SOURCE_DISCOVERY
+            and context.get("unique_id") == unique_id
+        ):
             return True
     return False
 
@@ -146,3 +153,9 @@ def _suggest_name(candidate: PowerCandidate) -> str:
     if candidate.name and candidate.name != candidate.entity_id:
         return candidate.name
     return DEFAULT_NAME
+
+
+@callback
+def _pair_unique_id(device_power: str, grid_power: str) -> str:
+    """Return the unique ID for a device/grid pair."""
+    return f"{device_power}_{grid_power}"

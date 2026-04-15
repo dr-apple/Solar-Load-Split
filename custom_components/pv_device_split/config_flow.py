@@ -18,6 +18,7 @@ from .const import (
     DEFAULT_NAME,
     DOMAIN,
 )
+from .discovery import _pair_unique_id
 
 
 class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -76,7 +77,10 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         }
 
         await self.async_set_unique_id(
-            f"{discovery_info[CONF_DEVICE_POWER]}_{discovery_info[CONF_GRID_POWER]}"
+            _pair_unique_id(
+                discovery_info[CONF_DEVICE_POWER],
+                discovery_info[CONF_GRID_POWER],
+            )
         )
         self._abort_if_unique_id_configured()
 
@@ -130,7 +134,10 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.ConfigFlowResult:
         """Create a device split config entry."""
         await self.async_set_unique_id(
-            f"{user_input[CONF_DEVICE_POWER]}_{user_input[CONF_GRID_POWER]}"
+            _pair_unique_id(
+                user_input[CONF_DEVICE_POWER],
+                user_input[CONF_GRID_POWER],
+            )
         )
         self._abort_if_unique_id_configured()
 
