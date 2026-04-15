@@ -8,7 +8,8 @@
         "data": {
           "name": "Name",
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
-          "invert_grid": "Netz-Vorzeichen umkehren"
+          "invert_grid": "Netz-Vorzeichen umkehren",
+          "enable_discovery": "Automatische Erkennung aktivieren"
         }
       },
       "user_manual_device": {
@@ -23,7 +24,8 @@
         "data": {
           "name": "Name",
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
-          "invert_grid": "Netz-Vorzeichen umkehren"
+          "invert_grid": "Netz-Vorzeichen umkehren",
+          "enable_discovery": "Automatische Erkennung aktivieren"
         }
       },
       "discovery_confirm": {

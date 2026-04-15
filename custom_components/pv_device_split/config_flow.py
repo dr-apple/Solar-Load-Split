@@ -13,6 +13,7 @@ from homeassistant.helpers import selector
 
 from .const import (
     CONF_DEVICE_POWER,
+    CONF_ENABLE_DISCOVERY,
     CONF_GRID_POWER,
     CONF_INVERT_GRID,
     DEFAULT_NAME,
@@ -143,6 +144,7 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_NAME: user_input.get(CONF_NAME, DEFAULT_NAME),
                 CONF_GRID_POWER: user_input[CONF_GRID_POWER],
                 CONF_INVERT_GRID: user_input.get(CONF_INVERT_GRID, False),
+                CONF_ENABLE_DISCOVERY: user_input.get(CONF_ENABLE_DISCOVERY, True),
             },
         )
 
@@ -188,6 +190,10 @@ def _hub_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
             vol.Optional(
                 CONF_INVERT_GRID,
                 default=defaults.get(CONF_INVERT_GRID, False),
+            ): selector.BooleanSelector(),
+            vol.Optional(
+                CONF_ENABLE_DISCOVERY,
+                default=defaults.get(CONF_ENABLE_DISCOVERY, True),
             ): selector.BooleanSelector(),
         }
     )

@@ -17,6 +17,7 @@ from homeassistant.helpers.event import async_call_later
 
 from .const import (
     CONF_DEVICE_POWER,
+    CONF_ENABLE_DISCOVERY,
     CONF_GRID_POWER,
     CONF_INVERT_GRID,
     DEFAULT_NAME,
@@ -137,6 +138,9 @@ def _grid_source_entries(hass: HomeAssistant) -> list[config_entries.ConfigEntry
     entries: list[config_entries.ConfigEntry] = []
 
     for entry in hass.config_entries.async_entries(DOMAIN):
+        if not entry.data.get(CONF_ENABLE_DISCOVERY, True):
+            continue
+
         grid_power = entry.data.get(CONF_GRID_POWER)
         if grid_power is None or grid_power in seen:
             continue
