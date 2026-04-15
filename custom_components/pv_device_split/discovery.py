@@ -1,0 +1,148 @@
+"""Discovery helpers for Solar Load Split."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from homeassistant import config_entries
+from homeassistant.const import (
+    ATTR_DEVICE_CLASS,
+    ATTR_FRIENDLY_NAME,
+    ATTR_UNIT_OF_MEASUREMENT,
+    CONF_NAME,
+)
+from homeassistant.core import HomeAssistant, callback
+
+from .const import (
+    CONF_DEVICE_POWER,
+    CONF_GRID_POWER,
+    CONF_INVERT_GRID,
+    DEFAULT_NAME,
+    DOMAIN,
+)
+
+POWER_UNITS = {"W", "kW"}
+GRID_HINTS = (
+    "grid",
+    "netz",
+    "meter",
+    "smart_meter",
+    "utility",
+    "stromzaehler",
+    "stromzähler",
+    "einspeis",
+    "bezug",
+)
+
+
+@dataclass(frozen=True)
+class PowerCandidate:
+    """A candidate power sensor."""
+
+    entity_id: str
+    name: str
+    is_grid: bool
+
+
+@callback
+def async_schedule_power_discovery(hass: HomeAssistant) -> None:
+    """Schedule a scan for useful power sensors."""
+    hass.async_create_task(_async_discover_power_pair(hass))
+
+
+async def _async_discover_power_pair(hass: HomeAssistant) -> None:
+    """Start a discovery flow when a likely device/grid pair exists."""
+    if _has_discovery_flow_in_progress(hass):
+        return
+
+    grid_entries = _grid_entries(hass)
+    if not grid_entries:
+        return
+
+    candidates = _power_candidates(hass)
+    device_candidates = [candidate for candidate in candidates if not candidate.is_grid]
+
+    for grid_entry in grid_entries:
+        grid_power = grid_entry.data[CONF_GRID_POWER]
+        for device_candidate in device_candidates:
+            if device_candidate.entity_id == grid_power:
+                continue
+
+            if _is_configured(hass, device_candidate.entity_id, grid_power):
+                continue
+
+            await hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={"source": config_entries.SOURCE_DISCOVERY},
+                data={
+                    CONF_NAME: _suggest_name(device_candidate),
+                    CONF_DEVICE_POWER: device_candidate.entity_id,
+                    CONF_GRID_POWER: grid_power,
+                    CONF_INVERT_GRID: grid_entry.data.get(CONF_INVERT_GRID, False),
+                },
+            )
+            return
+
+
+@callback
+def _power_candidates(hass: HomeAssistant) -> list[PowerCandidate]:
+    """Return sensor entities that look like power sensors."""
+    candidates: list[PowerCandidate] = []
+
+    for state in hass.states.async_all("sensor"):
+        unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)
+        device_class = state.attributes.get(ATTR_DEVICE_CLASS)
+
+        if device_class != "power" and unit not in POWER_UNITS:
+            continue
+
+        name = state.attributes.get(ATTR_FRIENDLY_NAME, state.entity_id)
+        text = f"{state.entity_id} {name}".casefold()
+        candidates.append(
+            PowerCandidate(
+                entity_id=state.entity_id,
+                name=name,
+                is_grid=any(hint in text for hint in GRID_HINTS),
+            )
+        )
+
+    return candidates
+
+
+@callback
+def _grid_entries(hass: HomeAssistant) -> list[config_entries.ConfigEntry]:
+    """Return configured base grid entries."""
+    return [
+        entry
+        for entry in hass.config_entries.async_entries(DOMAIN)
+        if CONF_GRID_POWER in entry.data and CONF_DEVICE_POWER not in entry.data
+    ]
+
+
+@callback
+def _has_discovery_flow_in_progress(hass: HomeAssistant) -> bool:
+    """Return whether a discovery flow is already in progress."""
+    for flow in hass.config_entries.flow.async_progress_by_handler(DOMAIN):
+        if flow["context"].get("source") == config_entries.SOURCE_DISCOVERY:
+            return True
+    return False
+
+
+@callback
+def _is_configured(hass: HomeAssistant, device_power: str, grid_power: str) -> bool:
+    """Return whether the pair already has a config entry."""
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        if (
+            entry.data.get(CONF_DEVICE_POWER) == device_power
+            and entry.data.get(CONF_GRID_POWER) == grid_power
+        ):
+            return True
+    return False
+
+
+@callback
+def _suggest_name(candidate: PowerCandidate) -> str:
+    """Suggest a config entry name from a power sensor."""
+    if candidate.name and candidate.name != candidate.entity_id:
+        return candidate.name
+    return DEFAULT_NAME

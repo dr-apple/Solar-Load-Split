@@ -3,17 +3,25 @@
     "step": {
       "user": {
         "title": "Solar Load Split",
-        "description": "Teilt den Verbrauch eines Geräts in solarversorgte Leistung und netzversorgte Leistung auf.",
+        "description": "Wähle einmal den Netzbezug-/Einspeise-Leistungssensor. Solar Load Split nutzt ihn, um passende Geräte-Leistungssensoren zu entdecken.",
         "data": {
           "name": "Name",
-          "device_power": "Leistungssensor des Geräts",
           "grid_power": "Netzleistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren"
+        }
+      },
+      "discovery_confirm": {
+        "title": "Solar Load Split hat Leistungssensoren entdeckt",
+        "description": "Home Assistant hat einen Geräte-Leistungssensor gefunden, der zu Solar Load Split passen könnte. Prüfe den Vorschlag und passe ihn bei Bedarf an.",
+        "data": {
+          "name": "Name",
+          "device_power": "Leistungssensor des Geräts"
         }
       }
     },
     "abort": {
-      "already_configured": "Dieses Geräte- und Netzsensor-Paar ist bereits eingerichtet."
+      "already_configured": "Dieses Geräte- und Netzsensor-Paar ist bereits eingerichtet.",
+      "discovery_missing": "Die entdeckten Sensorinformationen sind nicht mehr verfügbar."
     }
   },
   "entity": {
