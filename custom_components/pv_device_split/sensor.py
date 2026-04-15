@@ -24,6 +24,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import (
     async_track_state_change_event,
@@ -87,6 +88,17 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         suggested_display_precision=2,
     ),
+)
+
+SHORT_ENTITY_NAMES = (
+    "PV Power",
+    "Grid Power",
+    "PV Energy",
+    "Grid Energy",
+    "PV Leistung",
+    "Netz Leistung",
+    "PV Energie",
+    "Netz Energie",
 )
 
 
@@ -256,6 +268,7 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
             ),
         )
         self._attr_name = self.entity_description.name
+        self._full_name = self.entity_description.name
         self._attr_unique_id = f"{runtime.entry.entry_id}_{description.key}"
         self._attr_device_info = runtime.device_info
         self._attr_native_value: float | None = None
@@ -271,6 +284,7 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
     async def async_added_to_hass(self) -> None:
         """Restore energy totals and subscribe to runtime updates."""
         await super().async_added_to_hass()
+        self._async_update_registry_name()
 
         if self.entity_description.key in (
             SplitSensorKey.PV_ENERGY,
@@ -293,6 +307,19 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
 
         self._update_native_value()
         self._remove_listener = self.runtime.add_listener(self._handle_runtime_update)
+
+    @callback
+    def _async_update_registry_name(self) -> None:
+        """Update old registry names from previous versions."""
+        registry = er.async_get(self.hass)
+        entity_entry = registry.async_get(self.entity_id)
+        if entity_entry is None:
+            return
+
+        if entity_entry.name == self._full_name:
+            return
+
+        registry.async_update_entity(self.entity_id, name=self._full_name)
 
     async def async_will_remove_from_hass(self) -> None:
         """Unsubscribe from runtime updates."""
@@ -352,4 +379,4 @@ def _localized_entity_name(
     }
 
     names = german_names if (language or "").startswith("de") else english_names
-    return f"{device_name} {names[key]}"
+    return f"{device_name} - {names[key]}"
