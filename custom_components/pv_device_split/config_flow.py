@@ -34,17 +34,35 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            if _grid_entries(self.hass):
+            if _grid_source_entries(self.hass):
                 return await self._async_create_split_entry(
                     _with_grid_defaults(self.hass, user_input)
                 )
             return await self._async_create_hub_entry(user_input)
 
-        if _grid_entries(self.hass):
-            return await self.async_step_manual_device()
+        if self.hass.config_entries.async_entries(DOMAIN):
+            return self.async_show_menu(
+                step_id="user",
+                menu_options=["manual_device", "hub"],
+            )
 
         return self.async_show_form(
             step_id="user",
+            data_schema=_hub_schema(),
+            errors=errors,
+        )
+
+    async def async_step_hub(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Create an additional base grid entry."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            return await self._async_create_hub_entry(user_input)
+
+        return self.async_show_form(
+            step_id="hub",
             data_schema=_hub_schema(),
             errors=errors,
         )
@@ -53,10 +71,7 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
         """Manually add a device power sensor."""
-        grid_entries = _grid_entries(self.hass)
-        if not grid_entries:
-            return await self.async_step_user(user_input)
-
+        grid_source_entries = _grid_source_entries(self.hass)
         if user_input is not None:
             return await self._async_create_split_entry(
                 _with_grid_defaults(self.hass, user_input)
@@ -64,7 +79,9 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="manual_device",
-            data_schema=_manual_device_schema(grid_entries[0].data),
+            data_schema=_manual_device_schema(
+                grid_source_entries[0].data if grid_source_entries else {}
+            ),
         )
 
     async def async_step_discovery(
@@ -198,40 +215,53 @@ def _discovery_schema(defaults: dict[str, Any]) -> vol.Schema:
 @callback
 def _manual_device_schema(defaults: dict[str, Any]) -> vol.Schema:
     """Return the manual device schema."""
-    return vol.Schema(
-        {
+    schema: dict = {
+        vol.Optional(
+            CONF_NAME,
+            default=DEFAULT_NAME,
+        ): selector.TextSelector(),
+        vol.Required(CONF_DEVICE_POWER): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain="sensor")
+        ),
+        vol.Required(
+            CONF_GRID_POWER,
+            default=defaults.get(CONF_GRID_POWER, vol.UNDEFINED),
+        ): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+    }
+
+    if CONF_INVERT_GRID not in defaults:
+        schema[
             vol.Optional(
-                CONF_NAME,
-                default=defaults.get(CONF_NAME, DEFAULT_NAME),
-            ): selector.TextSelector(),
-            vol.Required(CONF_DEVICE_POWER): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-            vol.Required(
-                CONF_GRID_POWER,
-                default=defaults.get(CONF_GRID_POWER, vol.UNDEFINED),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-        }
-    )
+                CONF_INVERT_GRID,
+                default=False,
+            )
+        ] = selector.BooleanSelector()
+
+    return vol.Schema(schema)
 
 
 @callback
-def _grid_entries(hass) -> list[config_entries.ConfigEntry]:
-    """Return configured base grid entries."""
-    return [
-        entry
-        for entry in hass.config_entries.async_entries(DOMAIN)
-        if CONF_GRID_POWER in entry.data and CONF_DEVICE_POWER not in entry.data
-    ]
+def _grid_source_entries(hass) -> list[config_entries.ConfigEntry]:
+    """Return entries that can provide a grid sensor for device setup."""
+    seen: set[str] = set()
+    entries: list[config_entries.ConfigEntry] = []
+
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        grid_power = entry.data.get(CONF_GRID_POWER)
+        if grid_power is None or grid_power in seen:
+            continue
+
+        seen.add(grid_power)
+        entries.append(entry)
+
+    return entries
 
 
 @callback
 def _with_grid_defaults(hass, user_input: dict[str, Any]) -> dict[str, Any]:
     """Add inherited grid options to a manual device config."""
     grid_power = user_input[CONF_GRID_POWER]
-    for entry in _grid_entries(hass):
+    for entry in _grid_source_entries(hass):
         if entry.data.get(CONF_GRID_POWER) == grid_power:
             return {
                 **entry.data,

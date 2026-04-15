@@ -7,14 +7,17 @@ from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import HomeAssistant
 
 from .const import CONF_DEVICE_POWER, DOMAIN, PLATFORMS
-from .discovery import async_schedule_power_discovery
+from .discovery import (
+    async_schedule_power_discovery,
+    async_schedule_power_discovery_retries,
+)
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up Solar Load Split."""
     hass.bus.async_listen_once(
         EVENT_HOMEASSISTANT_STARTED,
-        lambda event: async_schedule_power_discovery(hass),
+        lambda event: async_schedule_power_discovery_retries(hass),
     )
     return True
 
@@ -25,6 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = entry.data
 
     async_schedule_power_discovery(hass)
+    async_schedule_power_discovery_retries(hass)
 
     if CONF_DEVICE_POWER not in entry.data:
         return True
