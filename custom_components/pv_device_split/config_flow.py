@@ -46,6 +46,9 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.ConfigFlowResult:
         """Handle a discovered power sensor pair."""
         self._discovery_info = discovery_info
+        self.context["title_placeholders"] = {
+            "name": discovery_info.get(CONF_NAME, discovery_info[CONF_DEVICE_POWER]),
+        }
 
         await self.async_set_unique_id(
             f"{discovery_info[CONF_DEVICE_POWER]}_{discovery_info[CONF_GRID_POWER]}"
@@ -72,6 +75,13 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="discovery_confirm",
             data_schema=_discovery_schema(self._discovery_info),
+            description_placeholders={
+                "device_name": self._discovery_info.get(
+                    CONF_NAME,
+                    self._discovery_info[CONF_DEVICE_POWER],
+                ),
+                "device_entity": self._discovery_info[CONF_DEVICE_POWER],
+            },
         )
 
     async def _async_create_hub_entry(

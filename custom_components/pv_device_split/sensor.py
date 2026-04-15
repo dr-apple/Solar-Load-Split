@@ -241,7 +241,7 @@ async def async_setup_entry(
 class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
     """Solar Load Split sensor."""
 
-    _attr_has_entity_name = True
+    _attr_has_entity_name = False
 
     def __init__(
         self,
@@ -251,6 +251,8 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
         """Initialize the sensor."""
         self.runtime = runtime
         self.entity_description = description
+        self._attr_name = f"{runtime.name} {description.name}"
+        self._attr_translation_placeholders = {"device_name": runtime.name}
         self._attr_unique_id = f"{runtime.entry.entry_id}_{description.key}"
         self._attr_device_info = runtime.device_info
         self._attr_native_value: float | None = None
