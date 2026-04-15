@@ -49,6 +49,9 @@ The setup flow asks for:
 - `grid_power`: the grid power sensor in W
 - `invert_grid`: optional boolean for meters where export/import signs are reversed
 
+The setup flow and entity names are translated for English and German Home Assistant
+installations.
+
 Grid convention after optional inversion:
 
 - Positive grid power means grid import.
@@ -78,10 +81,10 @@ Energy sensors integrate the calculated power over time and are restored after r
 
 | Entity | Unit | Device class | State class |
 | --- | --- | --- | --- |
-| PV Power | kW | power | measurement |
-| Grid Power | kW | power | measurement |
-| PV Energy | kWh | energy | total_increasing |
-| Grid Energy | kWh | energy | total_increasing |
+| `<Device name> PV Power` / `<Gerätename> PV Leistung` | kW | power | measurement |
+| `<Device name> Grid Power` / `<Gerätename> Netz Leistung` | kW | power | measurement |
+| `<Device name> PV Energy` / `<Gerätename> PV Energie` | kWh | energy | total_increasing |
+| `<Device name> Grid Energy` / `<Gerätename> Netz Energie` | kWh | energy | total_increasing |
 
 The energy sensors use `total_increasing`, `kWh`, and the energy device class, so they are compatible with the Home Assistant Energy dashboard.
 

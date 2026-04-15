@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Solar Load Split",
+        "description": "Teilt den Verbrauch eines Geräts in solarversorgte Leistung und netzversorgte Leistung auf.",
+        "data": {
+          "name": "Name",
+          "device_power": "Leistungssensor des Geräts",
+          "grid_power": "Netzleistungssensor",
+          "invert_grid": "Netz-Vorzeichen umkehren"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Dieses Geräte- und Netzsensor-Paar ist bereits eingerichtet."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "pv_power": {
+        "name": "PV Leistung"
+      },
+      "grid_power": {
+        "name": "Netz Leistung"
+      },
+      "pv_energy": {
+        "name": "PV Energie"
+      },
+      "grid_energy": {
+        "name": "Netz Energie"
+      }
+    }
+  }
+}

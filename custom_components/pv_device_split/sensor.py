@@ -55,7 +55,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         key=SplitSensorKey.PV_POWER,
         translation_key=SplitSensorKey.PV_POWER,
-        name="PV Power",
+        name="PV Leistung",
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
@@ -64,7 +64,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         key=SplitSensorKey.GRID_POWER,
         translation_key=SplitSensorKey.GRID_POWER,
-        name="Grid Power",
+        name="Netz Leistung",
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
@@ -73,7 +73,8 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         key=SplitSensorKey.PV_ENERGY,
         translation_key=SplitSensorKey.PV_ENERGY,
-        name="PV Energy",
+        name="PV Energie",
+        icon="mdi:solar-power",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
@@ -82,7 +83,8 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         key=SplitSensorKey.GRID_ENERGY,
         translation_key=SplitSensorKey.GRID_ENERGY,
-        name="Grid Energy",
+        name="Netz Energie",
+        icon="mdi:transmission-tower",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
