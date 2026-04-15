@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">Solar Load Split Sensoren</title>
+  <desc id="desc">Mockup der erzeugten Sensoren fuer PV Leistung, Netz Leistung, PV Energie und Netz Energie.</desc>
+  <rect width="1280" height="760" rx="28" fill="#111315"/>
+  <rect x="48" y="48" width="1184" height="664" rx="24" fill="#1b1d1f" stroke="#35383b" stroke-width="2"/>
+  <text x="92" y="112" fill="#e8eaed" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700">PV Flachdach Gesamtertrag</text>
+  <text x="92" y="150" fill="#aeb4ba" font-family="Arial, Helvetica, sans-serif" font-size="20">Virtueller Split-Zaehler von Solar Load Split</text>
+
+  <rect x="92" y="198" width="1096" height="430" rx="18" fill="#222528"/>
+  <text x="128" y="254" fill="#e8eaed" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Sensoren</text>
+
+  <g font-family="Arial, Helvetica, sans-serif" font-size="24">
+    <rect x="128" y="292" width="1024" height="70" rx="10" fill="#2b2e31"/>
+    <text x="184" y="337" fill="#f2f4f5">PV Flachdach Gesamtertrag PV Leistung</text>
+    <text x="1010" y="337" fill="#f2f4f5" text-anchor="end">1,77 kW</text>
+    <path d="M146 318h22l-14 22h18l-30 42 8-32h-18z" fill="#45c96f"/>
+
+    <rect x="128" y="378" width="1024" height="70" rx="10" fill="#2b2e31"/>
+    <text x="184" y="423" fill="#f2f4f5">PV Flachdach Gesamtertrag Netz Leistung</text>
+    <text x="1010" y="423" fill="#f2f4f5" text-anchor="end">0,00 kW</text>
+    <path d="M154 392v42M138 434h32M142 404h24M134 418h40" stroke="#8aa0b6" stroke-width="5" stroke-linecap="round"/>
+
+    <rect x="128" y="464" width="1024" height="70" rx="10" fill="#2b2e31"/>
+    <text x="184" y="509" fill="#f2f4f5">PV Flachdach Gesamtertrag PV Energie</text>
+    <text x="1010" y="509" fill="#f2f4f5" text-anchor="end">0,01 kWh</text>
+    <circle cx="154" cy="499" r="18" fill="#f6b42a"/>
+
+    <rect x="128" y="550" width="1024" height="70" rx="10" fill="#2b2e31"/>
+    <text x="184" y="595" fill="#f2f4f5">PV Flachdach Gesamtertrag Netz Energie</text>
+    <text x="1010" y="595" fill="#f2f4f5" text-anchor="end">0,00 kWh</text>
+    <path d="M154 564v42M138 606h32M142 576h24M134 590h40" stroke="#8aa0b6" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <rect x="92" y="652" width="740" height="38" rx="8" fill="#18282c" stroke="#0ea5c6" stroke-width="2"/>
+  <text x="116" y="677" fill="#62d7f7" font-family="Arial, Helvetica, sans-serif" font-size="18">kWh-Sensoren: device_class energy, state_class total_increasing, last_reset = None</text>
+</svg>

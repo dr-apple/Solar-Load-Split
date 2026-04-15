@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">Solar Load Split Basiseinrichtung</title>
+  <desc id="desc">Mockup der Home-Assistant-Einrichtung fuer den Netzbezug- und Einspeisesensor.</desc>
+  <rect width="1280" height="760" rx="28" fill="#111315"/>
+  <rect x="34" y="34" width="1212" height="692" rx="24" fill="#1b1d1f" stroke="#35383b" stroke-width="2"/>
+  <text x="76" y="94" fill="#e8eaed" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Solar Load Split einrichten</text>
+  <text x="76" y="138" fill="#aeb4ba" font-family="Arial, Helvetica, sans-serif" font-size="20">Schritt 1: Netzsensor einmalig festlegen</text>
+  <rect x="76" y="180" width="1128" height="112" rx="10" fill="#2b2e31"/>
+  <text x="108" y="224" fill="#aeb4ba" font-family="Arial, Helvetica, sans-serif" font-size="18">Name</text>
+  <text x="108" y="260" fill="#f2f4f5" font-family="Arial, Helvetica, sans-serif" font-size="28">Solar Load Split</text>
+  <rect x="76" y="330" width="1128" height="112" rx="10" fill="#2b2e31"/>
+  <text x="108" y="374" fill="#aeb4ba" font-family="Arial, Helvetica, sans-serif" font-size="18">Netzbezug-/Einspeise-Leistungssensor</text>
+  <text x="108" y="410" fill="#f2f4f5" font-family="Arial, Helvetica, sans-serif" font-size="28">sensor.netz_leistung</text>
+  <path d="M1150 378l18 18 18-18" fill="none" stroke="#aeb4ba" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="76" y="480" width="1128" height="96" rx="10" fill="#222528"/>
+  <rect x="108" y="508" width="44" height="44" rx="8" fill="#0ea5c6"/>
+  <path d="M119 530h22" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <path d="M130 519v22" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <text x="178" y="521" fill="#f2f4f5" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">Netz-Vorzeichen umkehren</text>
+  <text x="178" y="552" fill="#aeb4ba" font-family="Arial, Helvetica, sans-serif" font-size="18">Nur aktivieren, wenn dein Zaehler Import und Einspeisung andersherum liefert.</text>
+  <rect x="1008" y="626" width="166" height="68" rx="34" fill="#0097b8"/>
+  <text x="1061" y="670" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700">OK</text>
+  <rect x="76" y="626" width="650" height="68" rx="10" fill="#18282c" stroke="#0ea5c6" stroke-width="2"/>
+  <text x="108" y="668" fill="#62d7f7" font-family="Arial, Helvetica, sans-serif" font-size="20">positiv = Netzbezug, negativ = Einspeisung</text>
+</svg>

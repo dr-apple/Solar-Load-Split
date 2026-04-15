@@ -12,6 +12,8 @@ from homeassistant.const import (
     CONF_NAME,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.event import async_call_later
 
 from .const import (
     CONF_DEVICE_POWER,
@@ -50,9 +52,20 @@ def async_schedule_power_discovery(hass: HomeAssistant) -> None:
     hass.async_create_task(_async_discover_power_pair(hass))
 
 
+@callback
+def async_schedule_power_discovery_retries(hass: HomeAssistant) -> None:
+    """Schedule several scans while Home Assistant finishes restoring states."""
+    for delay in (5, 30, 120):
+        async_call_later(
+            hass,
+            delay,
+            lambda now: async_schedule_power_discovery(hass),
+        )
+
+
 async def _async_discover_power_pair(hass: HomeAssistant) -> None:
     """Start discovery flows for likely device/grid pairs."""
-    grid_entries = _grid_entries(hass)
+    grid_entries = _grid_source_entries(hass)
     if not grid_entries:
         return
 
@@ -91,8 +104,13 @@ async def _async_discover_power_pair(hass: HomeAssistant) -> None:
 def _power_candidates(hass: HomeAssistant) -> list[PowerCandidate]:
     """Return sensor entities that look like power sensors."""
     candidates: list[PowerCandidate] = []
+    entity_registry = er.async_get(hass)
 
     for state in hass.states.async_all("sensor"):
+        entity_entry = entity_registry.async_get(state.entity_id)
+        if entity_entry is not None and entity_entry.platform == DOMAIN:
+            continue
+
         unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)
         device_class = state.attributes.get(ATTR_DEVICE_CLASS)
 
@@ -113,13 +131,20 @@ def _power_candidates(hass: HomeAssistant) -> list[PowerCandidate]:
 
 
 @callback
-def _grid_entries(hass: HomeAssistant) -> list[config_entries.ConfigEntry]:
-    """Return configured base grid entries."""
-    return [
-        entry
-        for entry in hass.config_entries.async_entries(DOMAIN)
-        if CONF_GRID_POWER in entry.data and CONF_DEVICE_POWER not in entry.data
-    ]
+def _grid_source_entries(hass: HomeAssistant) -> list[config_entries.ConfigEntry]:
+    """Return entries that can provide a grid sensor for discovery."""
+    seen: set[str] = set()
+    entries: list[config_entries.ConfigEntry] = []
+
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        grid_power = entry.data.get(CONF_GRID_POWER)
+        if grid_power is None or grid_power in seen:
+            continue
+
+        seen.add(grid_power)
+        entries.append(entry)
+
+    return entries
 
 
 @callback

@@ -5,6 +5,19 @@
       "user": {
         "title": "Solar Load Split",
         "description": "Choose the grid import/export power sensor once. After optional inversion: positive = grid import, negative = grid export. Solar Load Split will use this sensor to discover matching device power sensors.",
+        "menu_options": {
+          "manual_device": "Add device manually",
+          "hub": "Configure another grid sensor"
+        },
+        "data": {
+          "name": "Name",
+          "grid_power": "Grid import/export power sensor",
+          "invert_grid": "Invert grid sign"
+        }
+      },
+      "hub": {
+        "title": "Configure grid sensor",
+        "description": "Choose a grid import/export power sensor. After optional inversion: positive = grid import, negative = grid export.",
         "data": {
           "name": "Name",
           "grid_power": "Grid import/export power sensor",
@@ -21,11 +34,12 @@
       },
       "manual_device": {
         "title": "Add device manually",
-        "description": "Choose a device power sensor. The grid import/export sensor is inherited from the base entry.",
+        "description": "Choose a device power sensor. If a base entry was detected, the grid sensor is already prefilled.",
         "data": {
           "name": "Name",
           "device_power": "Device power sensor",
-          "grid_power": "Grid import/export power sensor"
+          "grid_power": "Grid import/export power sensor",
+          "invert_grid": "Invert grid sign"
         }
       }
     },
