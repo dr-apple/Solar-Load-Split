@@ -12,12 +12,6 @@
           "enable_discovery": "Enable automatic discovery"
         }
       },
-      "user_manual_device": {
-        "title": "Add device manually"
-      },
-      "user_hub": {
-        "title": "Configure another grid sensor"
-      },
       "hub": {
         "title": "Configure grid sensor",
         "description": "Choose a grid import/export power sensor. After optional inversion: positive = grid import, negative = grid export.",

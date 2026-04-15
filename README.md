@@ -124,7 +124,7 @@ Wenn ein Sensor nicht automatisch erkannt wird:
 1. **Integration hinzufuegen** oeffnen.
 2. **Solar Load Split** erneut auswaehlen.
 3. Falls Home Assistant erst eine Auswahlseite zeigt, **Eine weitere Instanz von Solar Load Split einrichten** auswaehlen.
-4. **Geraet manuell hinzufuegen** auswaehlen.
+4. Der Dialog **Geraet manuell hinzufuegen** oeffnet sich direkt.
 5. Geraete-Leistungssensor auswaehlen.
 6. Falls noetig Netzsensor kontrollieren oder auswaehlen.
 7. Bestaetigen.

@@ -12,12 +12,6 @@
           "enable_discovery": "Automatische Erkennung aktivieren"
         }
       },
-      "user_manual_device": {
-        "title": "Gerät manuell hinzufügen"
-      },
-      "user_hub": {
-        "title": "Weiteren Netzsensor einrichten"
-      },
       "hub": {
         "title": "Netzsensor einrichten",
         "description": "Wähle einen Netzbezug-/Einspeise-Leistungssensor. Nach optionaler Umkehrung gilt: positiv = Netzbezug, negativ = Einspeisung.",

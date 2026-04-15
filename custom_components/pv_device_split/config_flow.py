@@ -42,10 +42,7 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self._async_create_hub_entry(user_input)
 
         if self.hass.config_entries.async_entries(DOMAIN):
-            return self.async_show_menu(
-                step_id="user",
-                menu_options=["manual_device", "hub"],
-            )
+            return await self.async_step_manual_device()
 
         return self.async_show_form(
             step_id="user",
