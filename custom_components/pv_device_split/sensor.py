@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from dataclasses import replace
 from datetime import datetime
 from datetime import timedelta
 from enum import StrEnum
@@ -54,7 +55,6 @@ class SplitSensorKey(StrEnum):
 SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         key=SplitSensorKey.PV_POWER,
-        translation_key=SplitSensorKey.PV_POWER,
         name="PV Power",
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         device_class=SensorDeviceClass.POWER,
@@ -63,7 +63,6 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.GRID_POWER,
-        translation_key=SplitSensorKey.GRID_POWER,
         name="Grid Power",
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         device_class=SensorDeviceClass.POWER,
@@ -72,7 +71,6 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.PV_ENERGY,
-        translation_key=SplitSensorKey.PV_ENERGY,
         name="PV Energy",
         icon="mdi:solar-power",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
@@ -82,7 +80,6 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.GRID_ENERGY,
-        translation_key=SplitSensorKey.GRID_ENERGY,
         name="Grid Energy",
         icon="mdi:transmission-tower",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
@@ -250,9 +247,15 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
     ) -> None:
         """Initialize the sensor."""
         self.runtime = runtime
-        self.entity_description = description
-        self._attr_name = f"{runtime.name} {description.name}"
-        self._attr_translation_placeholders = {"device_name": runtime.name}
+        self.entity_description = replace(
+            description,
+            name=_localized_entity_name(
+                runtime.hass.config.language,
+                runtime.name,
+                description.key,
+            ),
+        )
+        self._attr_name = self.entity_description.name
         self._attr_unique_id = f"{runtime.entry.entry_id}_{description.key}"
         self._attr_device_info = runtime.device_info
         self._attr_native_value: float | None = None
@@ -327,3 +330,26 @@ def _state_as_float(hass: HomeAssistant, entity_id: str) -> float | None:
         return float(state.state)
     except (TypeError, ValueError):
         return None
+
+
+def _localized_entity_name(
+    language: str | None,
+    device_name: str,
+    key: str,
+) -> str:
+    """Return a stable full entity name for the current Home Assistant language."""
+    german_names = {
+        SplitSensorKey.PV_POWER: "PV Leistung",
+        SplitSensorKey.GRID_POWER: "Netz Leistung",
+        SplitSensorKey.PV_ENERGY: "PV Energie",
+        SplitSensorKey.GRID_ENERGY: "Netz Energie",
+    }
+    english_names = {
+        SplitSensorKey.PV_POWER: "PV Power",
+        SplitSensorKey.GRID_POWER: "Grid Power",
+        SplitSensorKey.PV_ENERGY: "PV Energy",
+        SplitSensorKey.GRID_ENERGY: "Grid Energy",
+    }
+
+    names = german_names if (language or "").startswith("de") else english_names
+    return f"{device_name} {names[key]}"

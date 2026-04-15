@@ -5,15 +5,17 @@
       "user": {
         "title": "Solar Load Split",
         "description": "Wähle einmal den Netzbezug-/Einspeise-Leistungssensor. Nach optionaler Umkehrung gilt: positiv = Netzbezug, negativ = Einspeisung. Solar Load Split nutzt diesen Sensor, um passende Geräte-Leistungssensoren zu entdecken.",
-        "menu_options": {
-          "manual_device": "Gerät manuell hinzufügen",
-          "hub": "Weiteren Netzsensor einrichten"
-        },
         "data": {
           "name": "Name",
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren"
         }
+      },
+      "user_manual_device": {
+        "title": "Gerät manuell hinzufügen"
+      },
+      "user_hub": {
+        "title": "Weiteren Netzsensor einrichten"
       },
       "hub": {
         "title": "Netzsensor einrichten",
