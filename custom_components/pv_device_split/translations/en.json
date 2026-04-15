@@ -1,18 +1,19 @@
 {
   "config": {
+    "flow_title": "Solar Load Split: {name}",
     "step": {
       "user": {
         "title": "Solar Load Split",
-        "description": "Choose the grid import/export power sensor once. Solar Load Split will use it to discover matching device power sensors.",
+        "description": "Choose the grid import/export power sensor once. After optional inversion: positive = grid import, negative = grid export. Solar Load Split will use this sensor to discover matching device power sensors.",
         "data": {
           "name": "Name",
-          "grid_power": "Grid power sensor",
+          "grid_power": "Grid import/export power sensor",
           "invert_grid": "Invert grid sign"
         }
       },
       "discovery_confirm": {
         "title": "Solar Load Split discovered power sensors",
-        "description": "Home Assistant found a device power sensor that may fit Solar Load Split. Check the suggestion and adjust it if needed.",
+        "description": "Discovered device: {device_name}\nEntity: {device_entity}\n\nCheck the suggestion and adjust it if needed.",
         "data": {
           "name": "Name",
           "device_power": "Device power sensor"
@@ -27,16 +28,16 @@
   "entity": {
     "sensor": {
       "pv_power": {
-        "name": "PV Power"
+        "name": "{device_name} PV Power"
       },
       "grid_power": {
-        "name": "Grid Power"
+        "name": "{device_name} Grid Power"
       },
       "pv_energy": {
-        "name": "PV Energy"
+        "name": "{device_name} PV Energy"
       },
       "grid_energy": {
-        "name": "Grid Energy"
+        "name": "{device_name} Grid Energy"
       }
     }
   }

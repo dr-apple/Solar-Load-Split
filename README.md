@@ -84,7 +84,15 @@ with the grid sensor. The discovery scan runs from that loaded base entry.
 Grid convention after optional inversion:
 
 - Positive grid power means grid import.
-- Negative grid power means export and PV is available.
+- Negative grid power means grid export/feed-in.
+- Solar/PV is considered available when the effective grid value is negative.
+
+Deutsch:
+
+- Positiver Netzsensor-Wert bedeutet Netzbezug.
+- Negativer Netzsensor-Wert bedeutet Einspeisung.
+- Solar/PV gilt als verfügbar, wenn der effektive Netzsensor-Wert negativ ist.
+- Wenn dein Zähler die Vorzeichen andersherum liefert, aktiviere `invert_grid`.
 
 ## Logic
 

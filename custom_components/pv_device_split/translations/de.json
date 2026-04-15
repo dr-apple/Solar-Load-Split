@@ -1,18 +1,19 @@
 {
   "config": {
+    "flow_title": "Solar Load Split: {name}",
     "step": {
       "user": {
         "title": "Solar Load Split",
-        "description": "Wähle einmal den Netzbezug-/Einspeise-Leistungssensor. Solar Load Split nutzt ihn, um passende Geräte-Leistungssensoren zu entdecken.",
+        "description": "Wähle einmal den Netzbezug-/Einspeise-Leistungssensor. Nach optionaler Umkehrung gilt: positiv = Netzbezug, negativ = Einspeisung. Solar Load Split nutzt diesen Sensor, um passende Geräte-Leistungssensoren zu entdecken.",
         "data": {
           "name": "Name",
-          "grid_power": "Netzleistungssensor",
+          "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren"
         }
       },
       "discovery_confirm": {
         "title": "Solar Load Split hat Leistungssensoren entdeckt",
-        "description": "Home Assistant hat einen Geräte-Leistungssensor gefunden, der zu Solar Load Split passen könnte. Prüfe den Vorschlag und passe ihn bei Bedarf an.",
+        "description": "Gefundenes Gerät: {device_name}\nEntity: {device_entity}\n\nPrüfe den Vorschlag und passe ihn bei Bedarf an.",
         "data": {
           "name": "Name",
           "device_power": "Leistungssensor des Geräts"
@@ -27,16 +28,16 @@
   "entity": {
     "sensor": {
       "pv_power": {
-        "name": "PV Leistung"
+        "name": "{device_name} PV Leistung"
       },
       "grid_power": {
-        "name": "Netz Leistung"
+        "name": "{device_name} Netz Leistung"
       },
       "pv_energy": {
-        "name": "PV Energie"
+        "name": "{device_name} PV Energie"
       },
       "grid_energy": {
-        "name": "Netz Energie"
+        "name": "{device_name} Netz Energie"
       }
     }
   }

@@ -1,42 +1,43 @@
 {
   "config": {
+    "flow_title": "Solar Load Split: {name}",
     "step": {
       "user": {
         "title": "Solar Load Split",
-        "description": "Choose the grid import/export power sensor once. Solar Load Split will use it to discover matching device power sensors.",
+        "description": "Wähle einmal den Netzbezug-/Einspeise-Leistungssensor. Nach optionaler Umkehrung gilt: positiv = Netzbezug, negativ = Einspeisung. Solar Load Split nutzt diesen Sensor, um passende Geräte-Leistungssensoren zu entdecken.",
         "data": {
           "name": "Name",
-          "grid_power": "Grid power sensor",
-          "invert_grid": "Invert grid sign"
+          "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
+          "invert_grid": "Netz-Vorzeichen umkehren"
         }
       },
       "discovery_confirm": {
-        "title": "Solar Load Split discovered power sensors",
-        "description": "Home Assistant found a device power sensor that may fit Solar Load Split. Check the suggestion and adjust it if needed.",
+        "title": "Solar Load Split hat einen Leistungssensor entdeckt",
+        "description": "Gefundenes Gerät: {device_name}\nEntity: {device_entity}\n\nPrüfe den Vorschlag und passe ihn bei Bedarf an.",
         "data": {
           "name": "Name",
-          "device_power": "Device power sensor"
+          "device_power": "Leistungssensor des Geräts"
         }
       }
     },
     "abort": {
-      "already_configured": "This device and grid sensor pair is already configured.",
-      "discovery_missing": "The discovered sensor information is no longer available."
+      "already_configured": "Dieses Geräte- und Netzsensor-Paar ist bereits eingerichtet.",
+      "discovery_missing": "Die entdeckten Sensorinformationen sind nicht mehr verfügbar."
     }
   },
   "entity": {
     "sensor": {
       "pv_power": {
-        "name": "PV Power"
+        "name": "{device_name} PV Leistung"
       },
       "grid_power": {
-        "name": "Grid Power"
+        "name": "{device_name} Netz Leistung"
       },
       "pv_energy": {
-        "name": "PV Energy"
+        "name": "{device_name} PV Energie"
       },
       "grid_energy": {
-        "name": "Grid Energy"
+        "name": "{device_name} Netz Energie"
       }
     }
   }
