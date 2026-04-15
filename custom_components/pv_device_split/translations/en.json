@@ -18,6 +18,15 @@
           "name": "Name",
           "device_power": "Device power sensor"
         }
+      },
+      "manual_device": {
+        "title": "Add device manually",
+        "description": "Choose a device power sensor. The grid import/export sensor is inherited from the base entry.",
+        "data": {
+          "name": "Name",
+          "device_power": "Device power sensor",
+          "grid_power": "Grid import/export power sensor"
+        }
       }
     },
     "abort": {

@@ -60,6 +60,10 @@ for:
 
 - `device_power`: the device's power sensor in W
 
+You can also add a device manually by adding Solar Load Split again after the
+base grid entry exists. The manual device flow asks for the device power sensor
+and uses the configured grid import/export sensor from the base entry.
+
 The setup flow and entity names are translated for English and German Home Assistant
 installations.
 

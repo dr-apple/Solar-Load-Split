@@ -18,6 +18,15 @@
           "name": "Name",
           "device_power": "Leistungssensor des Geräts"
         }
+      },
+      "manual_device": {
+        "title": "Gerät manuell hinzufügen",
+        "description": "Wähle einen Geräte-Leistungssensor aus. Der Netzbezug-/Einspeise-Sensor wird aus dem Basis-Eintrag übernommen.",
+        "data": {
+          "name": "Name",
+          "device_power": "Leistungssensor des Geräts",
+          "grid_power": "Netzbezug-/Einspeise-Leistungssensor"
+        }
       }
     },
     "abort": {
