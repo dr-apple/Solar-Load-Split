@@ -80,6 +80,8 @@ friendly name contains common names such as `grid`, `netz`, `meter`, `utility`,
 When a likely device sensor is found, Home Assistant can show Solar Load Split
 as a discovered integration. The discovered form is prefilled with the suggested
 device entity, but the user can still change it before creating the integration.
+Solar Load Split creates one discovered entry per matching device/grid pair that
+is not already configured.
 
 Home Assistant only runs code for integrations it has loaded. After installation
 through HACS, restart Home Assistant and create the first Solar Load Split entry
