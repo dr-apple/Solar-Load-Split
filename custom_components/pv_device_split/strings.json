@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Solar Load Split",
+        "description": "Split a device's consumption into solar-supplied power and grid-supplied power.",
+        "data": {
+          "name": "Name",
+          "device_power": "Device power sensor",
+          "grid_power": "Grid power sensor",
+          "invert_grid": "Invert grid sign"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This device and grid sensor pair is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "pv_power": {
+        "name": "PV Power"
+      },
+      "grid_power": {
+        "name": "Grid Power"
+      },
+      "pv_energy": {
+        "name": "PV Energy"
+      },
+      "grid_energy": {
+        "name": "Grid Energy"
+      }
+    }
+  }
+}

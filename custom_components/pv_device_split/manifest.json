@@ -1,0 +1,11 @@
+{
+  "domain": "pv_device_split",
+  "name": "Solar Load Split",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/custom-components/pv_device_split",
+  "iot_class": "local_push",
+  "requirements": [],
+  "version": "1.0.0"
+}
