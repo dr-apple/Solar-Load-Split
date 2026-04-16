@@ -46,6 +46,21 @@
       "discovery_missing": "Die entdeckten Sensorinformationen sind nicht mehr verfügbar."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Solar Load Split konfigurieren",
+        "description": "Passe diesen Eintrag an. Nach dem Speichern wird der Eintrag neu geladen.",
+        "data": {
+          "name": "Name",
+          "device_power": "Leistungssensor des Geräts",
+          "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
+          "invert_grid": "Netz-Vorzeichen umkehren",
+          "enable_discovery": "Automatische Erkennung aktivieren"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "pv_power": {
@@ -59,6 +74,30 @@
       },
       "grid_energy": {
         "name": "{device_name} Netz Energie"
+      },
+      "pv_energy_daily": {
+        "name": "{device_name} PV Tagesenergie"
+      },
+      "grid_energy_daily": {
+        "name": "{device_name} Netz Tagesenergie"
+      },
+      "pv_energy_weekly": {
+        "name": "{device_name} PV Wochenenergie"
+      },
+      "grid_energy_weekly": {
+        "name": "{device_name} Netz Wochenenergie"
+      },
+      "pv_energy_monthly": {
+        "name": "{device_name} PV Monatsenergie"
+      },
+      "grid_energy_monthly": {
+        "name": "{device_name} Netz Monatsenergie"
+      },
+      "pv_energy_yearly": {
+        "name": "{device_name} PV Jahresenergie"
+      },
+      "grid_energy_yearly": {
+        "name": "{device_name} Netz Jahresenergie"
       }
     }
   }

@@ -46,6 +46,21 @@
       "discovery_missing": "The discovered sensor information is no longer available."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Solar Load Split",
+        "description": "Adjust this entry. The entry is reloaded after saving.",
+        "data": {
+          "name": "Name",
+          "device_power": "Device power sensor",
+          "grid_power": "Grid import/export power sensor",
+          "invert_grid": "Invert grid sign",
+          "enable_discovery": "Enable automatic discovery"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "pv_power": {
@@ -59,6 +74,30 @@
       },
       "grid_energy": {
         "name": "{device_name} Grid Energy"
+      },
+      "pv_energy_daily": {
+        "name": "{device_name} PV Daily Energy"
+      },
+      "grid_energy_daily": {
+        "name": "{device_name} Grid Daily Energy"
+      },
+      "pv_energy_weekly": {
+        "name": "{device_name} PV Weekly Energy"
+      },
+      "grid_energy_weekly": {
+        "name": "{device_name} Grid Weekly Energy"
+      },
+      "pv_energy_monthly": {
+        "name": "{device_name} PV Monthly Energy"
+      },
+      "grid_energy_monthly": {
+        "name": "{device_name} Grid Monthly Energy"
+      },
+      "pv_energy_yearly": {
+        "name": "{device_name} PV Yearly Energy"
+      },
+      "grid_energy_yearly": {
+        "name": "{device_name} Grid Yearly Energy"
       }
     }
   }
