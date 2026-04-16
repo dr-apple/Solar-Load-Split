@@ -28,6 +28,14 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
     _discovery_info: dict[str, Any] | None = None
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> config_entries.OptionsFlow:
+        """Create the options flow."""
+        return PVDeviceSplitOptionsFlow(config_entry)
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
@@ -276,3 +284,68 @@ def _with_grid_defaults(hass, user_input: dict[str, Any]) -> dict[str, Any]:
         **user_input,
         CONF_INVERT_GRID: user_input.get(CONF_INVERT_GRID, False),
     }
+
+
+class PVDeviceSplitOptionsFlow(config_entries.OptionsFlow):
+    """Handle options for Solar Load Split."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Manage entry options."""
+        if user_input is not None:
+            data = {
+                **self.config_entry.data,
+                **user_input,
+            }
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                title=data.get(CONF_NAME, DEFAULT_NAME),
+                data=data,
+            )
+            self.hass.async_create_task(
+                self.hass.config_entries.async_reload(self.config_entry.entry_id)
+            )
+            return self.async_create_entry(title="", data={})
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=_options_schema(self.config_entry.data),
+        )
+
+
+@callback
+def _options_schema(defaults: dict[str, Any]) -> vol.Schema:
+    """Return options schema for an existing entry."""
+    schema: dict = {
+        vol.Optional(
+            CONF_NAME,
+            default=defaults.get(CONF_NAME, DEFAULT_NAME),
+        ): selector.TextSelector(),
+        vol.Required(
+            CONF_GRID_POWER,
+            default=defaults.get(CONF_GRID_POWER, vol.UNDEFINED),
+        ): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+        vol.Optional(
+            CONF_INVERT_GRID,
+            default=defaults.get(CONF_INVERT_GRID, False),
+        ): selector.BooleanSelector(),
+        vol.Optional(
+            CONF_ENABLE_DISCOVERY,
+            default=defaults.get(CONF_ENABLE_DISCOVERY, True),
+        ): selector.BooleanSelector(),
+    }
+
+    if CONF_DEVICE_POWER in defaults:
+        schema[
+            vol.Required(
+                CONF_DEVICE_POWER,
+                default=defaults.get(CONF_DEVICE_POWER, vol.UNDEFINED),
+            )
+        ] = selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor"))
+
+    return vol.Schema(schema)

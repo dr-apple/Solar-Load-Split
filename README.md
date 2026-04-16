@@ -13,20 +13,29 @@ Die Einrichtung laeuft komplett ueber die Home-Assistant-Oberflaeche. YAML ist n
 
 Du richtest einmal deinen Netzbezug-/Einspeise-Leistungssensor ein. Danach kann Solar Load Split passende Geraete-Leistungssensoren erkennen oder manuell hinzufuegen.
 
-Aus jedem Geraet entstehen vier Sensoren:
+Aus jedem Geraet entstehen zwoelf Sensoren:
 
 | Sensor | Einheit | Device class | State class |
 | --- | --- | --- | --- |
-| `<Gerätename> - PV Leistung` | kW | power | measurement |
-| `<Gerätename> - Netz Leistung` | kW | power | measurement |
-| `<Gerätename> - PV Energie` | kWh | energy | total_increasing |
-| `<Gerätename> - Netz Energie` | kWh | energy | total_increasing |
+| `<Gerätename> PV Leistung` | kW | power | measurement |
+| `<Gerätename> Netz Leistung` | kW | power | measurement |
+| `<Gerätename> PV Energie` | kWh | energy | total_increasing |
+| `<Gerätename> Netz Energie` | kWh | energy | total_increasing |
+| `<Gerätename> PV Tagesenergie` | kWh | energy | total |
+| `<Gerätename> Netz Tagesenergie` | kWh | energy | total |
+| `<Gerätename> PV Wochenenergie` | kWh | energy | total |
+| `<Gerätename> Netz Wochenenergie` | kWh | energy | total |
+| `<Gerätename> PV Monatsenergie` | kWh | energy | total |
+| `<Gerätename> Netz Monatsenergie` | kWh | energy | total |
+| `<Gerätename> PV Jahresenergie` | kWh | energy | total |
+| `<Gerätename> Netz Jahresenergie` | kWh | energy | total |
 
 Die kWh-Sensoren sind fuer das Home-Assistant Energy Dashboard vorbereitet:
 
 - `device_class: energy`
-- `state_class: total_increasing`
 - `native_unit_of_measurement: kWh`
+- Gesamtzaehler: `state_class: total_increasing`
+- Tages-/Wochen-/Monats-/Jahreszaehler: `state_class: total`
 - `last_reset = None`
 
 ## Bilder Zur Einrichtung
@@ -130,6 +139,20 @@ Wenn ein Sensor nicht automatisch erkannt wird:
 7. Bestaetigen.
 
 Der Netzsensor und `invert_grid` werden aus dem Basis-Eintrag uebernommen, wenn ein passender Eintrag erkannt wurde. Andernfalls kannst du sie im manuellen Dialog auswaehlen.
+
+### Bestehende Eintraege Aendern
+
+Bereits eingerichtete Eintraege kannst du ueber **Konfigurieren** bearbeiten.
+
+Je nach Eintrag kannst du anpassen:
+
+- Name
+- Geraete-Leistungssensor
+- Netzbezug-/Einspeise-Leistungssensor
+- Netz-Vorzeichen umkehren
+- Automatische Erkennung aktivieren
+
+Nach dem Speichern wird der Eintrag automatisch neu geladen.
 
 ## Berechnungslogik
 

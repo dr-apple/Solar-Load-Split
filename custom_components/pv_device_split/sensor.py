@@ -51,6 +51,28 @@ class SplitSensorKey(StrEnum):
     GRID_POWER = "grid_power"
     PV_ENERGY = "pv_energy"
     GRID_ENERGY = "grid_energy"
+    PV_ENERGY_DAILY = "pv_energy_daily"
+    GRID_ENERGY_DAILY = "grid_energy_daily"
+    PV_ENERGY_WEEKLY = "pv_energy_weekly"
+    GRID_ENERGY_WEEKLY = "grid_energy_weekly"
+    PV_ENERGY_MONTHLY = "pv_energy_monthly"
+    GRID_ENERGY_MONTHLY = "grid_energy_monthly"
+    PV_ENERGY_YEARLY = "pv_energy_yearly"
+    GRID_ENERGY_YEARLY = "grid_energy_yearly"
+
+
+PERIOD_SENSOR_KEYS: dict[SplitSensorKey, tuple[str, str]] = {
+    SplitSensorKey.PV_ENERGY_DAILY: ("pv", "day"),
+    SplitSensorKey.GRID_ENERGY_DAILY: ("grid", "day"),
+    SplitSensorKey.PV_ENERGY_WEEKLY: ("pv", "week"),
+    SplitSensorKey.GRID_ENERGY_WEEKLY: ("grid", "week"),
+    SplitSensorKey.PV_ENERGY_MONTHLY: ("pv", "month"),
+    SplitSensorKey.GRID_ENERGY_MONTHLY: ("grid", "month"),
+    SplitSensorKey.PV_ENERGY_YEARLY: ("pv", "year"),
+    SplitSensorKey.GRID_ENERGY_YEARLY: ("grid", "year"),
+}
+
+PERIODS = ("day", "week", "month", "year")
 
 
 SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
@@ -88,6 +110,78 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         suggested_display_precision=2,
     ),
+    SensorEntityDescription(
+        key=SplitSensorKey.PV_ENERGY_DAILY,
+        name="PV Daily Energy",
+        icon="mdi:solar-power",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+        suggested_display_precision=2,
+    ),
+    SensorEntityDescription(
+        key=SplitSensorKey.GRID_ENERGY_DAILY,
+        name="Grid Daily Energy",
+        icon="mdi:transmission-tower",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+        suggested_display_precision=2,
+    ),
+    SensorEntityDescription(
+        key=SplitSensorKey.PV_ENERGY_WEEKLY,
+        name="PV Weekly Energy",
+        icon="mdi:solar-power",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+        suggested_display_precision=2,
+    ),
+    SensorEntityDescription(
+        key=SplitSensorKey.GRID_ENERGY_WEEKLY,
+        name="Grid Weekly Energy",
+        icon="mdi:transmission-tower",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+        suggested_display_precision=2,
+    ),
+    SensorEntityDescription(
+        key=SplitSensorKey.PV_ENERGY_MONTHLY,
+        name="PV Monthly Energy",
+        icon="mdi:solar-power",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+        suggested_display_precision=2,
+    ),
+    SensorEntityDescription(
+        key=SplitSensorKey.GRID_ENERGY_MONTHLY,
+        name="Grid Monthly Energy",
+        icon="mdi:transmission-tower",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+        suggested_display_precision=2,
+    ),
+    SensorEntityDescription(
+        key=SplitSensorKey.PV_ENERGY_YEARLY,
+        name="PV Yearly Energy",
+        icon="mdi:solar-power",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+        suggested_display_precision=2,
+    ),
+    SensorEntityDescription(
+        key=SplitSensorKey.GRID_ENERGY_YEARLY,
+        name="Grid Yearly Energy",
+        icon="mdi:transmission-tower",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+        suggested_display_precision=2,
+    ),
 )
 
 SHORT_ENTITY_NAMES = (
@@ -99,6 +193,22 @@ SHORT_ENTITY_NAMES = (
     "Netz Leistung",
     "PV Energie",
     "Netz Energie",
+    "PV Daily Energy",
+    "Grid Daily Energy",
+    "PV Weekly Energy",
+    "Grid Weekly Energy",
+    "PV Monthly Energy",
+    "Grid Monthly Energy",
+    "PV Yearly Energy",
+    "Grid Yearly Energy",
+    "PV Tagesenergie",
+    "Netz Tagesenergie",
+    "PV Wochenenergie",
+    "Netz Wochenenergie",
+    "PV Monatsenergie",
+    "Netz Monatsenergie",
+    "PV Jahresenergie",
+    "Netz Jahresenergie",
 )
 
 
@@ -123,6 +233,10 @@ class PVDeviceSplitRuntime:
         self.invert_grid = entry.data.get(CONF_INVERT_GRID, False)
         self.pv_energy_kwh = 0.0
         self.grid_energy_kwh = 0.0
+        self.period_energy_kwh: dict[str, float] = {
+            key: 0.0 for key in PERIOD_SENSOR_KEYS
+        }
+        self.period_markers: dict[str, str] = {}
         self.powers = SplitPower(0.0, 0.0)
         self.last_update: datetime | None = None
         self.available = False
@@ -208,9 +322,14 @@ class PVDeviceSplitRuntime:
             grid_power_w *= -1
 
         if self.last_update is not None:
+            self._reset_periods_if_needed(now)
             elapsed_hours = max((now - self.last_update).total_seconds(), 0.0) / 3600
             self.pv_energy_kwh += self.powers.pv_power_kw * elapsed_hours
             self.grid_energy_kwh += self.powers.grid_power_kw * elapsed_hours
+            self._add_period_energy("pv", self.powers.pv_power_kw, elapsed_hours)
+            self._add_period_energy("grid", self.powers.grid_power_kw, elapsed_hours)
+        else:
+            self._reset_periods_if_needed(now)
 
         self.last_update = now
         self.powers = self._calculate(device_power_w, grid_power_w)
@@ -228,6 +347,52 @@ class PVDeviceSplitRuntime:
             pv_power_kw=round(pv_used_w / 1000, 2),
             grid_power_kw=round(grid_used_w / 1000, 2),
         )
+
+    @callback
+    def restore_period_energy(
+        self,
+        key: SplitSensorKey,
+        value: float,
+        last_updated: datetime | None,
+    ) -> None:
+        """Restore a period energy value if it belongs to the current period."""
+        if key not in PERIOD_SENSOR_KEYS:
+            return
+
+        _, period = PERIOD_SENSOR_KEYS[key]
+        now = dt_util.utcnow()
+        self.period_markers[period] = _period_marker(now, period)
+
+        if last_updated is None:
+            return
+
+        if _period_marker(last_updated, period) == self.period_markers[period]:
+            self.period_energy_kwh[key] = value
+
+    @callback
+    def _reset_periods_if_needed(self, now: datetime) -> None:
+        """Reset period counters when the local period changes."""
+        for period in PERIODS:
+            marker = _period_marker(now, period)
+            if self.period_markers.get(period) == marker:
+                continue
+
+            self.period_markers[period] = marker
+            for key, (_, key_period) in PERIOD_SENSOR_KEYS.items():
+                if key_period == period:
+                    self.period_energy_kwh[key] = 0.0
+
+    @callback
+    def _add_period_energy(
+        self,
+        source: str,
+        power_kw: float,
+        elapsed_hours: float,
+    ) -> None:
+        """Add energy to the matching period counters."""
+        for key, (key_source, _) in PERIOD_SENSOR_KEYS.items():
+            if key_source == source:
+                self.period_energy_kwh[key] += power_kw * elapsed_hours
 
 
 async def async_setup_entry(
@@ -289,6 +454,7 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
         if self.entity_description.key in (
             SplitSensorKey.PV_ENERGY,
             SplitSensorKey.GRID_ENERGY,
+            *PERIOD_SENSOR_KEYS,
         ):
             if (last_state := await self.async_get_last_state()) is not None:
                 try:
@@ -302,8 +468,14 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
                 else:
                     if self.entity_description.key == SplitSensorKey.PV_ENERGY:
                         self.runtime.pv_energy_kwh = value
-                    else:
+                    elif self.entity_description.key == SplitSensorKey.GRID_ENERGY:
                         self.runtime.grid_energy_kwh = value
+                    else:
+                        self.runtime.restore_period_energy(
+                            self.entity_description.key,
+                            value,
+                            last_state.last_updated,
+                        )
 
         self._update_native_value()
         self._remove_listener = self.runtime.add_listener(self._handle_runtime_update)
@@ -345,6 +517,11 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
                 self._attr_native_value = round(self.runtime.pv_energy_kwh, 2)
             case SplitSensorKey.GRID_ENERGY:
                 self._attr_native_value = round(self.runtime.grid_energy_kwh, 2)
+            case key if key in PERIOD_SENSOR_KEYS:
+                self._attr_native_value = round(
+                    self.runtime.period_energy_kwh[key],
+                    2,
+                )
 
 
 def _state_as_float(hass: HomeAssistant, entity_id: str) -> float | None:
@@ -370,13 +547,46 @@ def _localized_entity_name(
         SplitSensorKey.GRID_POWER: "Netz Leistung",
         SplitSensorKey.PV_ENERGY: "PV Energie",
         SplitSensorKey.GRID_ENERGY: "Netz Energie",
+        SplitSensorKey.PV_ENERGY_DAILY: "PV Tagesenergie",
+        SplitSensorKey.GRID_ENERGY_DAILY: "Netz Tagesenergie",
+        SplitSensorKey.PV_ENERGY_WEEKLY: "PV Wochenenergie",
+        SplitSensorKey.GRID_ENERGY_WEEKLY: "Netz Wochenenergie",
+        SplitSensorKey.PV_ENERGY_MONTHLY: "PV Monatsenergie",
+        SplitSensorKey.GRID_ENERGY_MONTHLY: "Netz Monatsenergie",
+        SplitSensorKey.PV_ENERGY_YEARLY: "PV Jahresenergie",
+        SplitSensorKey.GRID_ENERGY_YEARLY: "Netz Jahresenergie",
     }
     english_names = {
         SplitSensorKey.PV_POWER: "PV Power",
         SplitSensorKey.GRID_POWER: "Grid Power",
         SplitSensorKey.PV_ENERGY: "PV Energy",
         SplitSensorKey.GRID_ENERGY: "Grid Energy",
+        SplitSensorKey.PV_ENERGY_DAILY: "PV Daily Energy",
+        SplitSensorKey.GRID_ENERGY_DAILY: "Grid Daily Energy",
+        SplitSensorKey.PV_ENERGY_WEEKLY: "PV Weekly Energy",
+        SplitSensorKey.GRID_ENERGY_WEEKLY: "Grid Weekly Energy",
+        SplitSensorKey.PV_ENERGY_MONTHLY: "PV Monthly Energy",
+        SplitSensorKey.GRID_ENERGY_MONTHLY: "Grid Monthly Energy",
+        SplitSensorKey.PV_ENERGY_YEARLY: "PV Yearly Energy",
+        SplitSensorKey.GRID_ENERGY_YEARLY: "Grid Yearly Energy",
     }
 
     names = german_names if (language or "").startswith("de") else english_names
-    return f"{device_name} - {names[key]}"
+    return f"{device_name} {names[key]}"
+
+
+def _period_marker(timestamp: datetime, period: str) -> str:
+    """Return a local period marker for a timestamp."""
+    local = dt_util.as_local(timestamp)
+
+    if period == "day":
+        return local.date().isoformat()
+    if period == "week":
+        year, week, _ = local.isocalendar()
+        return f"{year}-W{week}"
+    if period == "month":
+        return f"{local.year}-{local.month}"
+    if period == "year":
+        return str(local.year)
+
+    return local.date().isoformat()
