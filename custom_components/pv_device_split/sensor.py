@@ -238,7 +238,9 @@ class PVDeviceSplitRuntime:
             int(entry.data.get(CONF_GRID_BUFFER_SECONDS, DEFAULT_GRID_BUFFER_SECONDS)),
             0,
         )
-        self._grid_samples: list[tuple[datetime, float]] = []
+        self._stable_grid_is_export: bool | None = None
+        self._pending_grid_is_export: bool | None = None
+        self._pending_grid_since: datetime | None = None
         self.pv_energy_kwh = 0.0
         self.grid_energy_kwh = 0.0
         self.period_energy_kwh: dict[str, float] = {
@@ -345,20 +347,39 @@ class PVDeviceSplitRuntime:
 
     @callback
     def _buffered_grid_power(self, now: datetime, grid_power_w: float) -> float:
-        """Return a time-buffered grid power value."""
+        """Return a sign-debounced grid power value."""
         if self.grid_buffer_seconds <= 0:
-            self._grid_samples = [(now, grid_power_w)]
+            self._stable_grid_is_export = grid_power_w < 0
+            self._pending_grid_is_export = None
+            self._pending_grid_since = None
             return grid_power_w
 
-        cutoff = now - timedelta(seconds=self.grid_buffer_seconds)
-        self._grid_samples = [
-            (sample_time, sample_value)
-            for sample_time, sample_value in self._grid_samples
-            if sample_time >= cutoff
-        ]
-        self._grid_samples.append((now, grid_power_w))
+        grid_is_export = grid_power_w < 0
+        if self._stable_grid_is_export is None:
+            self._stable_grid_is_export = grid_is_export
+            return grid_power_w
 
-        return sum(value for _, value in self._grid_samples) / len(self._grid_samples)
+        if grid_is_export == self._stable_grid_is_export:
+            self._pending_grid_is_export = None
+            self._pending_grid_since = None
+            return grid_power_w
+
+        if self._pending_grid_is_export != grid_is_export:
+            self._pending_grid_is_export = grid_is_export
+            self._pending_grid_since = now
+            return _force_grid_sign(grid_power_w, self._stable_grid_is_export)
+
+        if (
+            self._pending_grid_since is not None
+            and (now - self._pending_grid_since).total_seconds()
+            >= self.grid_buffer_seconds
+        ):
+            self._stable_grid_is_export = grid_is_export
+            self._pending_grid_is_export = None
+            self._pending_grid_since = None
+            return grid_power_w
+
+        return _force_grid_sign(grid_power_w, self._stable_grid_is_export)
 
     @staticmethod
     def _calculate(device_power_w: float, grid_power_w: float) -> SplitPower:
@@ -622,3 +643,9 @@ def _period_marker(timestamp: datetime, period: str) -> str:
         return str(local.year)
 
     return local.date().isoformat()
+
+
+def _force_grid_sign(grid_power_w: float, export: bool) -> float:
+    """Force a grid value to the currently stable sign."""
+    value = abs(grid_power_w)
+    return -value if export else value

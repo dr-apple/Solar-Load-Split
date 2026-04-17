@@ -112,10 +112,11 @@ Beim ersten Einrichten fragt Solar Load Split nach:
 
 Dieser Basis-Eintrag erzeugt noch keine Split-Sensoren. Er speichert nur den Netzsensor, der fuer alle Geraete verwendet wird.
 
-Der zeitliche Netzpuffer glaettet den Netzsensor ueber die letzten X Sekunden.
-Das verhindert, dass Solar Load Split bei kurzen Akku-/Wechselrichter-Schwankungen
-sofort zwischen Netzbezug und Einspeisung springt. `0` deaktiviert die
-Glaettung. Standard ist `30` Sekunden.
+Der zeitliche Netzpuffer entprellt nur den Wechsel zwischen Netzbezug und
+Einspeisung. Die aktuelle Leistungshoehe wird nicht gemittelt. Das verhindert,
+dass Solar Load Split bei kurzen Akku-/Wechselrichter-Schwankungen sofort
+zwischen Netzbezug und Einspeisung springt. `0` deaktiviert den Puffer. Standard
+ist `0` Sekunden.
 
 ### Automatische Erkennung
 
@@ -170,7 +171,7 @@ Alle Quellwerte werden als Leistung erwartet.
 if invert_grid:
     grid_power = grid_power * -1
 
-grid_power = average(grid_power over grid_buffer_seconds)
+grid_power sign changes are delayed by grid_buffer_seconds
 
 if grid_power < 0:
     pv_used = min(device_power, abs(grid_power))
