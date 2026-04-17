@@ -413,7 +413,10 @@ class PVDeviceSplitRuntime:
     def _calculate(device_power_w: float, grid_power_w: float) -> SplitPower:
         """Calculate PV and grid power in kW."""
         if grid_power_w == 0:
-            return SplitPower(pv_power_kw=0.0, grid_power_kw=0.0)
+            return SplitPower(
+                pv_power_kw=round(device_power_w / 1000, 2),
+                grid_power_kw=0.0,
+            )
 
         if grid_power_w < 0:
             pv_used_w = min(device_power_w, abs(grid_power_w))
