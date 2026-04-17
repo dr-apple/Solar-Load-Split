@@ -336,7 +336,7 @@ class PVDeviceSplitOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -344,22 +344,22 @@ class PVDeviceSplitOptionsFlow(config_entries.OptionsFlow):
         """Manage entry options."""
         if user_input is not None:
             data = {
-                **self.config_entry.data,
+                **self._config_entry.data,
                 **user_input,
             }
             self.hass.config_entries.async_update_entry(
-                self.config_entry,
+                self._config_entry,
                 title=data.get(CONF_NAME, DEFAULT_NAME),
                 data=data,
             )
             self.hass.async_create_task(
-                self.hass.config_entries.async_reload(self.config_entry.entry_id)
+                self.hass.config_entries.async_reload(self._config_entry.entry_id)
             )
             return self.async_create_entry(title="", data={})
 
         return self.async_show_form(
             step_id="init",
-            data_schema=_options_schema(self.config_entry.data),
+            data_schema=_options_schema(self._config_entry.data),
         )
 
 
