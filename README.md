@@ -107,7 +107,7 @@ Beim ersten Einrichten fragt Solar Load Split nach:
 - `name`: Anzeigename des Basis-Eintrags
 - `grid_power`: Netzbezug-/Einspeise-Leistungssensor
 - `invert_grid`: optional, wenn dein Netzsensor die Vorzeichen andersherum liefert
-- `enable_discovery`: automatische Erkennung aktivieren oder deaktivieren
+- `enable_discovery`: automatische Erkennung aktivieren oder deaktivieren, Standard ist aus
 - `grid_buffer_seconds`: zeitlicher Netzpuffer in Sekunden
 
 Dieser Basis-Eintrag erzeugt noch keine Split-Sensoren. Er speichert nur den Netzsensor, der fuer alle Geraete verwendet wird.
@@ -122,6 +122,7 @@ Glaettung. Standard ist `30` Sekunden.
 Nach dem Laden des Basis-Eintrags scannt Solar Load Split vorhandene Leistungssensoren und erstellt Vorschlaege unter **Entdeckt**.
 
 Wenn **Automatische Erkennung aktivieren** ausgeschaltet ist, werden keine Discovery-Vorschlaege erzeugt. Manuelles Hinzufuegen funktioniert weiterhin.
+Der Schalter ist standardmaessig ausgeschaltet.
 
 Der Scan laeuft:
 

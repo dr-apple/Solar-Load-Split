@@ -151,7 +151,7 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_NAME: user_input.get(CONF_NAME, DEFAULT_NAME),
                 CONF_GRID_POWER: user_input[CONF_GRID_POWER],
                 CONF_INVERT_GRID: user_input.get(CONF_INVERT_GRID, False),
-                CONF_ENABLE_DISCOVERY: user_input.get(CONF_ENABLE_DISCOVERY, True),
+                CONF_ENABLE_DISCOVERY: user_input.get(CONF_ENABLE_DISCOVERY, False),
                 CONF_GRID_BUFFER_SECONDS: user_input.get(
                     CONF_GRID_BUFFER_SECONDS,
                     DEFAULT_GRID_BUFFER_SECONDS,
@@ -208,7 +208,7 @@ def _hub_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
             ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_ENABLE_DISCOVERY,
-                default=defaults.get(CONF_ENABLE_DISCOVERY, True),
+                default=defaults.get(CONF_ENABLE_DISCOVERY, False),
             ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_GRID_BUFFER_SECONDS,
@@ -381,7 +381,7 @@ def _options_schema(defaults: dict[str, Any]) -> vol.Schema:
         ): selector.BooleanSelector(),
         vol.Optional(
             CONF_ENABLE_DISCOVERY,
-            default=defaults.get(CONF_ENABLE_DISCOVERY, True),
+            default=defaults.get(CONF_ENABLE_DISCOVERY, False),
         ): selector.BooleanSelector(),
         vol.Optional(
             CONF_GRID_BUFFER_SECONDS,

@@ -138,7 +138,7 @@ def _grid_source_entries(hass: HomeAssistant) -> list[config_entries.ConfigEntry
     entries: list[config_entries.ConfigEntry] = []
 
     for entry in hass.config_entries.async_entries(DOMAIN):
-        if not entry.data.get(CONF_ENABLE_DISCOVERY, True):
+        if not entry.data.get(CONF_ENABLE_DISCOVERY, False):
             continue
 
         grid_power = entry.data.get(CONF_GRID_POWER)
