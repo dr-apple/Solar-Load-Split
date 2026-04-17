@@ -15,9 +15,11 @@ from .const import (
     CONF_DEVICE_POWER,
     CONF_ENABLE_DISCOVERY,
     CONF_GRID_BUFFER_SECONDS,
+    CONF_GRID_DEADBAND_WATTS,
     CONF_GRID_POWER,
     CONF_INVERT_GRID,
     DEFAULT_GRID_BUFFER_SECONDS,
+    DEFAULT_GRID_DEADBAND_WATTS,
     DEFAULT_NAME,
     DOMAIN,
 )
@@ -156,6 +158,10 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_GRID_BUFFER_SECONDS,
                     DEFAULT_GRID_BUFFER_SECONDS,
                 ),
+                CONF_GRID_DEADBAND_WATTS: user_input.get(
+                    CONF_GRID_DEADBAND_WATTS,
+                    DEFAULT_GRID_DEADBAND_WATTS,
+                ),
             },
         )
 
@@ -181,6 +187,10 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_GRID_BUFFER_SECONDS: user_input.get(
                     CONF_GRID_BUFFER_SECONDS,
                     DEFAULT_GRID_BUFFER_SECONDS,
+                ),
+                CONF_GRID_DEADBAND_WATTS: user_input.get(
+                    CONF_GRID_DEADBAND_WATTS,
+                    DEFAULT_GRID_DEADBAND_WATTS,
                 ),
             },
         )
@@ -221,6 +231,19 @@ def _hub_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
                     min=0,
                     max=600,
                     unit_of_measurement="s",
+                )
+            ),
+            vol.Optional(
+                CONF_GRID_DEADBAND_WATTS,
+                default=defaults.get(
+                    CONF_GRID_DEADBAND_WATTS,
+                    DEFAULT_GRID_DEADBAND_WATTS,
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=1000,
+                    unit_of_measurement="W",
                 )
             ),
         }
@@ -285,6 +308,20 @@ def _manual_device_schema(defaults: dict[str, Any]) -> vol.Schema:
             )
         )
 
+    if CONF_GRID_DEADBAND_WATTS not in defaults:
+        schema[
+            vol.Optional(
+                CONF_GRID_DEADBAND_WATTS,
+                default=DEFAULT_GRID_DEADBAND_WATTS,
+            )
+        ] = selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=1000,
+                unit_of_measurement="W",
+            )
+        )
+
     return vol.Schema(schema)
 
 
@@ -319,6 +356,10 @@ def _with_grid_defaults(hass, user_input: dict[str, Any]) -> dict[str, Any]:
                     CONF_GRID_BUFFER_SECONDS,
                     DEFAULT_GRID_BUFFER_SECONDS,
                 ),
+                CONF_GRID_DEADBAND_WATTS: entry.data.get(
+                    CONF_GRID_DEADBAND_WATTS,
+                    DEFAULT_GRID_DEADBAND_WATTS,
+                ),
             }
 
     return {
@@ -327,6 +368,10 @@ def _with_grid_defaults(hass, user_input: dict[str, Any]) -> dict[str, Any]:
         CONF_GRID_BUFFER_SECONDS: user_input.get(
             CONF_GRID_BUFFER_SECONDS,
             DEFAULT_GRID_BUFFER_SECONDS,
+        ),
+        CONF_GRID_DEADBAND_WATTS: user_input.get(
+            CONF_GRID_DEADBAND_WATTS,
+            DEFAULT_GRID_DEADBAND_WATTS,
         ),
     }
 
@@ -394,6 +439,19 @@ def _options_schema(defaults: dict[str, Any]) -> vol.Schema:
                 min=0,
                 max=600,
                 unit_of_measurement="s",
+            )
+        ),
+        vol.Optional(
+            CONF_GRID_DEADBAND_WATTS,
+            default=defaults.get(
+                CONF_GRID_DEADBAND_WATTS,
+                DEFAULT_GRID_DEADBAND_WATTS,
+            ),
+        ): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=1000,
+                unit_of_measurement="W",
             )
         ),
     }
