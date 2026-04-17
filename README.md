@@ -50,7 +50,7 @@ Nach optionaler Umkehrung gilt:
 
 - **positiv** = Netzbezug
 - **negativ** = Einspeisung
-- **innerhalb der Netz-Totzone** = neutral, wird nicht gezaehlt
+- **innerhalb der Netz-Totzone** = PV/Akku, wird als PV gezaehlt
 - **PV verfuegbar** = effektiver Netzsensor-Wert ist negativ
 
 Wenn dein Zaehler die Vorzeichen andersherum liefert, aktiviere **Netz-Vorzeichen umkehren**.
@@ -120,12 +120,12 @@ dass Solar Load Split bei kurzen Akku-/Wechselrichter-Schwankungen sofort
 zwischen Netzbezug und Einspeisung springt. `0` deaktiviert den Puffer. Standard
 ist `0` Sekunden.
 
-Die Netz-Totzone behandelt kleine Werte rund um `0 W` als neutral. Beispiel:
-Bei `100 W` Totzone werden `+80 W` Netzbezug oder `-50 W` Einspeisung nicht als
-echter Netzbezug oder echte Einspeisung gezaehlt. Das ist hilfreich, wenn ein
-Akku oder Wechselrichter den Netzanschlusspunkt regelt und der Zaehler staendig
-kleine Werte wie `9-80 W` meldet. Innerhalb der Totzone zaehlt Solar Load Split
-weder Netz- noch PV-Energie fuer das Geraet.
+Die Netz-Totzone behandelt kleine Werte rund um `0 W` als PV-/Akku-Versorgung.
+Beispiel: Bei `100 W` Totzone werden `+80 W` Netzbezug oder `-50 W` Einspeisung
+nicht als echter Netzbezug gezaehlt. Das ist hilfreich, wenn ein Akku oder
+Wechselrichter den Netzanschlusspunkt regelt und der Zaehler staendig kleine
+Werte wie `9-80 W` meldet. Innerhalb der Totzone zaehlt Solar Load Split die
+aktuelle Geraete-Leistung als PV-Energie und die Netz-Energie bleibt bei `0`.
 
 ### Automatische Erkennung
 
