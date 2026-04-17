@@ -9,7 +9,8 @@
           "name": "Name",
           "grid_power": "Grid import/export power sensor",
           "invert_grid": "Invert grid sign",
-          "enable_discovery": "Enable automatic discovery"
+          "enable_discovery": "Enable automatic discovery",
+          "grid_buffer_seconds": "Grid time buffer"
         }
       },
       "hub": {
@@ -19,7 +20,8 @@
           "name": "Name",
           "grid_power": "Grid import/export power sensor",
           "invert_grid": "Invert grid sign",
-          "enable_discovery": "Enable automatic discovery"
+          "enable_discovery": "Enable automatic discovery",
+          "grid_buffer_seconds": "Grid time buffer"
         }
       },
       "discovery_confirm": {
@@ -37,7 +39,8 @@
           "name": "Name",
           "device_power": "Device power sensor",
           "grid_power": "Grid import/export power sensor",
-          "invert_grid": "Invert grid sign"
+          "invert_grid": "Invert grid sign",
+          "grid_buffer_seconds": "Grid time buffer"
         }
       }
     },
@@ -56,7 +59,8 @@
           "device_power": "Device power sensor",
           "grid_power": "Grid import/export power sensor",
           "invert_grid": "Invert grid sign",
-          "enable_discovery": "Enable automatic discovery"
+          "enable_discovery": "Enable automatic discovery",
+          "grid_buffer_seconds": "Grid time buffer"
         }
       }
     }

@@ -9,7 +9,8 @@
           "name": "Name",
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren",
-          "enable_discovery": "Automatische Erkennung aktivieren"
+          "enable_discovery": "Automatische Erkennung aktivieren",
+          "grid_buffer_seconds": "Zeitlicher Netzpuffer"
         }
       },
       "hub": {
@@ -19,7 +20,8 @@
           "name": "Name",
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren",
-          "enable_discovery": "Automatische Erkennung aktivieren"
+          "enable_discovery": "Automatische Erkennung aktivieren",
+          "grid_buffer_seconds": "Zeitlicher Netzpuffer"
         }
       },
       "discovery_confirm": {
@@ -37,7 +39,8 @@
           "name": "Name",
           "device_power": "Leistungssensor des Geräts",
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
-          "invert_grid": "Netz-Vorzeichen umkehren"
+          "invert_grid": "Netz-Vorzeichen umkehren",
+          "grid_buffer_seconds": "Zeitlicher Netzpuffer"
         }
       }
     },
@@ -56,7 +59,8 @@
           "device_power": "Leistungssensor des Geräts",
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren",
-          "enable_discovery": "Automatische Erkennung aktivieren"
+          "enable_discovery": "Automatische Erkennung aktivieren",
+          "grid_buffer_seconds": "Zeitlicher Netzpuffer"
         }
       }
     }
