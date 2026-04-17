@@ -18,6 +18,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
+    ATTR_UNIT_OF_MEASUREMENT,
     CONF_NAME,
     UnitOfEnergy,
     UnitOfPower,
@@ -314,8 +315,8 @@ class PVDeviceSplitRuntime:
     @callback
     def _update(self, now: datetime) -> None:
         """Update power and energy values."""
-        device_power_w = _state_as_float(self.hass, self.device_power_entity)
-        grid_power_w = _state_as_float(self.hass, self.grid_power_entity)
+        device_power_w = _state_as_power_watts(self.hass, self.device_power_entity)
+        grid_power_w = _state_as_power_watts(self.hass, self.grid_power_entity)
 
         if device_power_w is None or grid_power_w is None:
             self.available = False
@@ -549,16 +550,22 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
                 )
 
 
-def _state_as_float(hass: HomeAssistant, entity_id: str) -> float | None:
-    """Return an entity state as a float."""
+def _state_as_power_watts(hass: HomeAssistant, entity_id: str) -> float | None:
+    """Return an entity power state in watts."""
     state = hass.states.get(entity_id)
     if state is None:
         return None
 
     try:
-        return float(state.state)
+        value = float(state.state)
     except (TypeError, ValueError):
         return None
+
+    unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)
+    if unit == UnitOfPower.KILO_WATT or str(unit).casefold() == "kw":
+        return value * 1000
+
+    return value
 
 
 def _localized_entity_name(
