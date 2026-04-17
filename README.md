@@ -108,8 +108,14 @@ Beim ersten Einrichten fragt Solar Load Split nach:
 - `grid_power`: Netzbezug-/Einspeise-Leistungssensor
 - `invert_grid`: optional, wenn dein Netzsensor die Vorzeichen andersherum liefert
 - `enable_discovery`: automatische Erkennung aktivieren oder deaktivieren
+- `grid_buffer_seconds`: zeitlicher Netzpuffer in Sekunden
 
 Dieser Basis-Eintrag erzeugt noch keine Split-Sensoren. Er speichert nur den Netzsensor, der fuer alle Geraete verwendet wird.
+
+Der zeitliche Netzpuffer glaettet den Netzsensor ueber die letzten X Sekunden.
+Das verhindert, dass Solar Load Split bei kurzen Akku-/Wechselrichter-Schwankungen
+sofort zwischen Netzbezug und Einspeisung springt. `0` deaktiviert die
+Glaettung. Standard ist `30` Sekunden.
 
 ### Automatische Erkennung
 
@@ -151,6 +157,7 @@ Je nach Eintrag kannst du anpassen:
 - Netzbezug-/Einspeise-Leistungssensor
 - Netz-Vorzeichen umkehren
 - Automatische Erkennung aktivieren
+- Zeitlicher Netzpuffer
 
 Nach dem Speichern wird der Eintrag automatisch neu geladen.
 
@@ -161,6 +168,8 @@ Alle Quellwerte werden als Leistung erwartet.
 ```text
 if invert_grid:
     grid_power = grid_power * -1
+
+grid_power = average(grid_power over grid_buffer_seconds)
 
 if grid_power < 0:
     pv_used = min(device_power, abs(grid_power))

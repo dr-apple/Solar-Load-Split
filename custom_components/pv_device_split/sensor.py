@@ -35,8 +35,10 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_DEVICE_POWER,
+    CONF_GRID_BUFFER_SECONDS,
     CONF_GRID_POWER,
     CONF_INVERT_GRID,
+    DEFAULT_GRID_BUFFER_SECONDS,
     DEFAULT_NAME,
     DOMAIN,
 )
@@ -231,6 +233,11 @@ class PVDeviceSplitRuntime:
         self.device_power_entity = entry.data[CONF_DEVICE_POWER]
         self.grid_power_entity = entry.data[CONF_GRID_POWER]
         self.invert_grid = entry.data.get(CONF_INVERT_GRID, False)
+        self.grid_buffer_seconds = max(
+            int(entry.data.get(CONF_GRID_BUFFER_SECONDS, DEFAULT_GRID_BUFFER_SECONDS)),
+            0,
+        )
+        self._grid_samples: list[tuple[datetime, float]] = []
         self.pv_energy_kwh = 0.0
         self.grid_energy_kwh = 0.0
         self.period_energy_kwh: dict[str, float] = {
@@ -320,6 +327,7 @@ class PVDeviceSplitRuntime:
         device_power_w = max(device_power_w, 0.0)
         if self.invert_grid:
             grid_power_w *= -1
+        grid_power_w = self._buffered_grid_power(now, grid_power_w)
 
         if self.last_update is not None:
             self._reset_periods_if_needed(now)
@@ -333,6 +341,23 @@ class PVDeviceSplitRuntime:
 
         self.last_update = now
         self.powers = self._calculate(device_power_w, grid_power_w)
+
+    @callback
+    def _buffered_grid_power(self, now: datetime, grid_power_w: float) -> float:
+        """Return a time-buffered grid power value."""
+        if self.grid_buffer_seconds <= 0:
+            self._grid_samples = [(now, grid_power_w)]
+            return grid_power_w
+
+        cutoff = now - timedelta(seconds=self.grid_buffer_seconds)
+        self._grid_samples = [
+            (sample_time, sample_value)
+            for sample_time, sample_value in self._grid_samples
+            if sample_time >= cutoff
+        ]
+        self._grid_samples.append((now, grid_power_w))
+
+        return sum(value for _, value in self._grid_samples) / len(self._grid_samples)
 
     @staticmethod
     def _calculate(device_power_w: float, grid_power_w: float) -> SplitPower:

@@ -14,8 +14,10 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_DEVICE_POWER,
     CONF_ENABLE_DISCOVERY,
+    CONF_GRID_BUFFER_SECONDS,
     CONF_GRID_POWER,
     CONF_INVERT_GRID,
+    DEFAULT_GRID_BUFFER_SECONDS,
     DEFAULT_NAME,
     DOMAIN,
 )
@@ -150,6 +152,10 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_GRID_POWER: user_input[CONF_GRID_POWER],
                 CONF_INVERT_GRID: user_input.get(CONF_INVERT_GRID, False),
                 CONF_ENABLE_DISCOVERY: user_input.get(CONF_ENABLE_DISCOVERY, True),
+                CONF_GRID_BUFFER_SECONDS: user_input.get(
+                    CONF_GRID_BUFFER_SECONDS,
+                    DEFAULT_GRID_BUFFER_SECONDS,
+                ),
             },
         )
 
@@ -172,6 +178,10 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_DEVICE_POWER: user_input[CONF_DEVICE_POWER],
                 CONF_GRID_POWER: user_input[CONF_GRID_POWER],
                 CONF_INVERT_GRID: user_input.get(CONF_INVERT_GRID, False),
+                CONF_GRID_BUFFER_SECONDS: user_input.get(
+                    CONF_GRID_BUFFER_SECONDS,
+                    DEFAULT_GRID_BUFFER_SECONDS,
+                ),
             },
         )
 
@@ -200,6 +210,19 @@ def _hub_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
                 CONF_ENABLE_DISCOVERY,
                 default=defaults.get(CONF_ENABLE_DISCOVERY, True),
             ): selector.BooleanSelector(),
+            vol.Optional(
+                CONF_GRID_BUFFER_SECONDS,
+                default=defaults.get(
+                    CONF_GRID_BUFFER_SECONDS,
+                    DEFAULT_GRID_BUFFER_SECONDS,
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=600,
+                    unit_of_measurement="s",
+                )
+            ),
         }
     )
 
@@ -248,6 +271,20 @@ def _manual_device_schema(defaults: dict[str, Any]) -> vol.Schema:
             )
         ] = selector.BooleanSelector()
 
+    if CONF_GRID_BUFFER_SECONDS not in defaults:
+        schema[
+            vol.Optional(
+                CONF_GRID_BUFFER_SECONDS,
+                default=DEFAULT_GRID_BUFFER_SECONDS,
+            )
+        ] = selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=600,
+                unit_of_measurement="s",
+            )
+        )
+
     return vol.Schema(schema)
 
 
@@ -278,11 +315,19 @@ def _with_grid_defaults(hass, user_input: dict[str, Any]) -> dict[str, Any]:
                 **entry.data,
                 **user_input,
                 CONF_INVERT_GRID: entry.data.get(CONF_INVERT_GRID, False),
+                CONF_GRID_BUFFER_SECONDS: entry.data.get(
+                    CONF_GRID_BUFFER_SECONDS,
+                    DEFAULT_GRID_BUFFER_SECONDS,
+                ),
             }
 
     return {
         **user_input,
         CONF_INVERT_GRID: user_input.get(CONF_INVERT_GRID, False),
+        CONF_GRID_BUFFER_SECONDS: user_input.get(
+            CONF_GRID_BUFFER_SECONDS,
+            DEFAULT_GRID_BUFFER_SECONDS,
+        ),
     }
 
 
@@ -338,6 +383,19 @@ def _options_schema(defaults: dict[str, Any]) -> vol.Schema:
             CONF_ENABLE_DISCOVERY,
             default=defaults.get(CONF_ENABLE_DISCOVERY, True),
         ): selector.BooleanSelector(),
+        vol.Optional(
+            CONF_GRID_BUFFER_SECONDS,
+            default=defaults.get(
+                CONF_GRID_BUFFER_SECONDS,
+                DEFAULT_GRID_BUFFER_SECONDS,
+            ),
+        ): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=600,
+                unit_of_measurement="s",
+            )
+        ),
     }
 
     if CONF_DEVICE_POWER in defaults:
