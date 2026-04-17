@@ -11,6 +11,6 @@ CONF_ENABLE_DISCOVERY = "enable_discovery"
 CONF_GRID_BUFFER_SECONDS = "grid_buffer_seconds"
 
 DEFAULT_NAME = "Solar Load Split"
-DEFAULT_GRID_BUFFER_SECONDS = 30
+DEFAULT_GRID_BUFFER_SECONDS = 0
 
 PLATFORMS = ["sensor"]
