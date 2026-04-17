@@ -19,7 +19,11 @@ from .const import (
     CONF_DEVICE_POWER,
     CONF_ENABLE_DISCOVERY,
     CONF_GRID_POWER,
+    CONF_GRID_BUFFER_SECONDS,
+    CONF_GRID_DEADBAND_WATTS,
     CONF_INVERT_GRID,
+    DEFAULT_GRID_BUFFER_SECONDS,
+    DEFAULT_GRID_DEADBAND_WATTS,
     DEFAULT_NAME,
     DOMAIN,
 )
@@ -97,6 +101,14 @@ async def _async_discover_power_pair(hass: HomeAssistant) -> None:
                     CONF_DEVICE_POWER: device_candidate.entity_id,
                     CONF_GRID_POWER: grid_power,
                     CONF_INVERT_GRID: grid_entry.data.get(CONF_INVERT_GRID, False),
+                    CONF_GRID_BUFFER_SECONDS: grid_entry.data.get(
+                        CONF_GRID_BUFFER_SECONDS,
+                        DEFAULT_GRID_BUFFER_SECONDS,
+                    ),
+                    CONF_GRID_DEADBAND_WATTS: grid_entry.data.get(
+                        CONF_GRID_DEADBAND_WATTS,
+                        DEFAULT_GRID_DEADBAND_WATTS,
+                    ),
                 },
             )
 

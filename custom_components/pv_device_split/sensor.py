@@ -37,9 +37,11 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_DEVICE_POWER,
     CONF_GRID_BUFFER_SECONDS,
+    CONF_GRID_DEADBAND_WATTS,
     CONF_GRID_POWER,
     CONF_INVERT_GRID,
     DEFAULT_GRID_BUFFER_SECONDS,
+    DEFAULT_GRID_DEADBAND_WATTS,
     DEFAULT_NAME,
     DOMAIN,
 )
@@ -238,6 +240,15 @@ class PVDeviceSplitRuntime:
             int(entry.data.get(CONF_GRID_BUFFER_SECONDS, DEFAULT_GRID_BUFFER_SECONDS)),
             0,
         )
+        self.grid_deadband_watts = max(
+            float(
+                entry.data.get(
+                    CONF_GRID_DEADBAND_WATTS,
+                    DEFAULT_GRID_DEADBAND_WATTS,
+                )
+            ),
+            0.0,
+        )
         self._stable_grid_is_export: bool | None = None
         self._pending_grid_is_export: bool | None = None
         self._pending_grid_since: datetime | None = None
@@ -330,6 +341,7 @@ class PVDeviceSplitRuntime:
         device_power_w = max(device_power_w, 0.0)
         if self.invert_grid:
             grid_power_w *= -1
+        grid_power_w = self._apply_grid_deadband(grid_power_w)
         grid_power_w = self._buffered_grid_power(now, grid_power_w)
 
         if self.last_update is not None:
@@ -346,10 +358,26 @@ class PVDeviceSplitRuntime:
         self.powers = self._calculate(device_power_w, grid_power_w)
 
     @callback
+    def _apply_grid_deadband(self, grid_power_w: float) -> float:
+        """Treat small grid import/export values as neutral inverter noise."""
+        if self.grid_deadband_watts <= 0:
+            return grid_power_w
+
+        if abs(grid_power_w) <= self.grid_deadband_watts:
+            return 0.0
+
+        return grid_power_w
+
+    @callback
     def _buffered_grid_power(self, now: datetime, grid_power_w: float) -> float:
         """Return a sign-debounced grid power value."""
         if self.grid_buffer_seconds <= 0:
             self._stable_grid_is_export = grid_power_w < 0
+            self._pending_grid_is_export = None
+            self._pending_grid_since = None
+            return grid_power_w
+
+        if grid_power_w == 0:
             self._pending_grid_is_export = None
             self._pending_grid_since = None
             return grid_power_w
@@ -384,6 +412,9 @@ class PVDeviceSplitRuntime:
     @staticmethod
     def _calculate(device_power_w: float, grid_power_w: float) -> SplitPower:
         """Calculate PV and grid power in kW."""
+        if grid_power_w == 0:
+            return SplitPower(pv_power_kw=0.0, grid_power_kw=0.0)
+
         if grid_power_w < 0:
             pv_used_w = min(device_power_w, abs(grid_power_w))
         else:

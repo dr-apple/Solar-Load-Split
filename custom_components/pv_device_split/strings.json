@@ -10,7 +10,8 @@
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren",
           "enable_discovery": "Automatische Erkennung aktivieren",
-          "grid_buffer_seconds": "Zeitlicher Netzpuffer"
+          "grid_buffer_seconds": "Zeitlicher Netzpuffer",
+          "grid_deadband_watts": "Netz-Totzone"
         }
       },
       "hub": {
@@ -21,7 +22,8 @@
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren",
           "enable_discovery": "Automatische Erkennung aktivieren",
-          "grid_buffer_seconds": "Zeitlicher Netzpuffer"
+          "grid_buffer_seconds": "Zeitlicher Netzpuffer",
+          "grid_deadband_watts": "Netz-Totzone"
         }
       },
       "discovery_confirm": {
@@ -40,7 +42,8 @@
           "device_power": "Leistungssensor des Geräts",
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren",
-          "grid_buffer_seconds": "Zeitlicher Netzpuffer"
+          "grid_buffer_seconds": "Zeitlicher Netzpuffer",
+          "grid_deadband_watts": "Netz-Totzone"
         }
       }
     },
@@ -60,7 +63,8 @@
           "grid_power": "Netzbezug-/Einspeise-Leistungssensor",
           "invert_grid": "Netz-Vorzeichen umkehren",
           "enable_discovery": "Automatische Erkennung aktivieren",
-          "grid_buffer_seconds": "Zeitlicher Netzpuffer"
+          "grid_buffer_seconds": "Zeitlicher Netzpuffer",
+          "grid_deadband_watts": "Netz-Totzone"
         }
       }
     }
