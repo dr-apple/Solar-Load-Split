@@ -359,7 +359,7 @@ class PVDeviceSplitRuntime:
 
     @callback
     def _apply_grid_deadband(self, grid_power_w: float) -> float:
-        """Treat small grid import/export values as neutral inverter noise."""
+        """Treat small grid import/export values as PV/battery supply."""
         if self.grid_deadband_watts <= 0:
             return grid_power_w
 
@@ -412,18 +412,8 @@ class PVDeviceSplitRuntime:
     @staticmethod
     def _calculate(device_power_w: float, grid_power_w: float) -> SplitPower:
         """Calculate PV and grid power in kW."""
-        if grid_power_w == 0:
-            return SplitPower(
-                pv_power_kw=round(device_power_w / 1000, 2),
-                grid_power_kw=0.0,
-            )
-
-        if grid_power_w < 0:
-            pv_used_w = min(device_power_w, abs(grid_power_w))
-        else:
-            pv_used_w = 0.0
-
-        grid_used_w = max(device_power_w - pv_used_w, 0.0)
+        grid_used_w = min(max(grid_power_w, 0.0), device_power_w)
+        pv_used_w = max(device_power_w - grid_used_w, 0.0)
         return SplitPower(
             pv_power_kw=round(pv_used_w / 1000, 2),
             grid_power_kw=round(grid_used_w / 1000, 2),

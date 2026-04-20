@@ -51,7 +51,7 @@ Nach optionaler Umkehrung gilt:
 - **positiv** = Netzbezug
 - **negativ** = Einspeisung
 - **innerhalb der Netz-Totzone** = PV/Akku, wird als PV gezaehlt
-- **PV verfuegbar** = effektiver Netzsensor-Wert ist negativ
+- **PV/Akku-Anteil** = Geraete-Leistung minus echter Netzbezug
 
 Wenn dein Zaehler die Vorzeichen andersherum liefert, aktiviere **Netz-Vorzeichen umkehren**.
 
@@ -127,6 +127,11 @@ Wechselrichter den Netzanschlusspunkt regelt und der Zaehler staendig kleine
 Werte wie `9-80 W` meldet. Innerhalb der Totzone zaehlt Solar Load Split die
 aktuelle Geraete-Leistung als PV-Energie und die Netz-Energie bleibt bei `0`.
 
+Wichtig: Der Netzsensor zeigt den Wert am Hausanschluss **nach** dem Geraet.
+Darum wird der echte Netzanteil des Geraets aus dem positiven Netzbezug
+abgeleitet und auf die Geraete-Leistung begrenzt. Alles, was nicht durch echten
+Netzbezug gedeckt ist, wird als PV-/Akku-Anteil gezaehlt.
+
 ### Automatische Erkennung
 
 Nach dem Laden des Basis-Eintrags scannt Solar Load Split vorhandene Leistungssensoren und erstellt Vorschlaege unter **Entdeckt**.
@@ -169,6 +174,7 @@ Je nach Eintrag kannst du anpassen:
 - Netz-Vorzeichen umkehren
 - Automatische Erkennung aktivieren
 - Zeitlicher Netzpuffer
+- Netz-Totzone
 
 Nach dem Speichern wird der Eintrag automatisch neu geladen.
 
@@ -182,12 +188,11 @@ if invert_grid:
 
 grid_power sign changes are delayed by grid_buffer_seconds
 
-if grid_power < 0:
-    pv_used = min(device_power, abs(grid_power))
-else:
-    pv_used = 0
+if abs(grid_power) <= grid_deadband_watts:
+    grid_power = 0
 
-grid_used = max(device_power - pv_used, 0)
+grid_used = min(max(grid_power, 0), device_power)
+pv_used = max(device_power - grid_used, 0)
 ```
 
 Ausgabe:
@@ -241,5 +246,10 @@ Setup is UI-only:
 2. Positive grid power means import, negative grid power means export/feed-in.
 3. Confirm discovered device power sensors or add a device manually by adding Solar Load Split again.
 4. Each device creates PV power, grid power, PV energy, and grid energy sensors.
+
+The grid sensor is assumed to measure the house connection after the device
+load. The device grid share is therefore the current positive grid import,
+limited to the device power. The remaining device power is counted as PV/battery
+share.
 
 Energy sensors use `kWh`, `device_class: energy`, `state_class: total_increasing`, and `last_reset = None`.
