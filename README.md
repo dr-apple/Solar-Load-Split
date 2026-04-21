@@ -201,6 +201,9 @@ Ausgabe:
 - Energiesensoren in `kWh`
 - Rundung auf 2 Nachkommastellen
 
+Intern rechnet Solar Load Split mit voller Praezision und rundet erst fuer die
+Anzeige der Sensorwerte.
+
 ## Ordnerstruktur
 
 ```text

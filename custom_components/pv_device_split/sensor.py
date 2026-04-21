@@ -415,8 +415,8 @@ class PVDeviceSplitRuntime:
         grid_used_w = min(max(grid_power_w, 0.0), device_power_w)
         pv_used_w = max(device_power_w - grid_used_w, 0.0)
         return SplitPower(
-            pv_power_kw=round(pv_used_w / 1000, 2),
-            grid_power_kw=round(grid_used_w / 1000, 2),
+            pv_power_kw=pv_used_w / 1000,
+            grid_power_kw=grid_used_w / 1000,
         )
 
     @callback
@@ -581,9 +581,12 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
         """Update the entity native value from the runtime."""
         match self.entity_description.key:
             case SplitSensorKey.PV_POWER:
-                self._attr_native_value = self.runtime.powers.pv_power_kw
+                self._attr_native_value = round(self.runtime.powers.pv_power_kw, 2)
             case SplitSensorKey.GRID_POWER:
-                self._attr_native_value = self.runtime.powers.grid_power_kw
+                self._attr_native_value = round(
+                    self.runtime.powers.grid_power_kw,
+                    2,
+                )
             case SplitSensorKey.PV_ENERGY:
                 self._attr_native_value = round(self.runtime.pv_energy_kwh, 2)
             case SplitSensorKey.GRID_ENERGY:
