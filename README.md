@@ -11,7 +11,7 @@ Die Einrichtung laeuft komplett ueber die Home-Assistant-Oberflaeche. YAML ist n
 
 ## Was Macht Die Integration?
 
-Du richtest einmal deinen Netzbezug-/Einspeise-Leistungssensor ein. Danach kann Solar Load Split passende Geraete-Leistungssensoren erkennen oder manuell hinzufuegen.
+Du richtest einmal deinen Netzbezug-/Einspeise-Leistungssensor ein. Danach kann Solar Load Split passende Geraete-Leistungssensoren erkennen oder manuell hinzufuegen. Optional kannst du pro Geraet auch einen Energiezaehler des gleichen Zwischensteckers oder Shelly auswaehlen.
 
 Aus jedem Geraet entstehen zwoelf Sensoren:
 
@@ -157,8 +157,9 @@ Wenn ein Sensor nicht automatisch erkannt wird:
 3. Falls Home Assistant erst eine Auswahlseite zeigt, **Eine weitere Instanz von Solar Load Split einrichten** auswaehlen.
 4. Der Dialog **Geraet manuell hinzufuegen** oeffnet sich direkt.
 5. Geraete-Leistungssensor auswaehlen.
-6. Falls noetig Netzsensor kontrollieren oder auswaehlen.
-7. Bestaetigen.
+6. Optional den Geraete-Energiesensor des gleichen Messgeraets auswaehlen.
+7. Falls noetig Netzsensor kontrollieren oder auswaehlen.
+8. Bestaetigen.
 
 Der Netzsensor und `invert_grid` werden aus dem Basis-Eintrag uebernommen, wenn ein passender Eintrag erkannt wurde. Andernfalls kannst du sie im manuellen Dialog auswaehlen.
 
@@ -170,6 +171,7 @@ Je nach Eintrag kannst du anpassen:
 
 - Name
 - Geraete-Leistungssensor
+- Geraete-Energiesensor
 - Netzbezug-/Einspeise-Leistungssensor
 - Netz-Vorzeichen umkehren
 - Automatische Erkennung aktivieren
@@ -180,7 +182,11 @@ Nach dem Speichern wird der Eintrag automatisch neu geladen.
 
 ## Berechnungslogik
 
-Alle Quellwerte werden als Leistung erwartet.
+Die Aufteilung nutzt immer den Geraete-Leistungssensor und den Netzsensor.
+Wenn ein optionaler Geraete-Energiesensor vorhanden ist, werden die echten
+kWh-Deltas dieses Sensors auf PV und Netz verteilt. Das liefert die genaueste
+Summe, weil `PV + Netz` dann direkt an den echten Energiezaehler des
+Zwischensteckers oder Shelly gekoppelt ist.
 
 ```text
 if invert_grid:
@@ -193,6 +199,14 @@ if abs(grid_power) <= grid_deadband_watts:
 
 grid_used = min(max(grid_power, 0), device_power)
 pv_used = max(device_power - grid_used, 0)
+
+if device_energy is available:
+    device_energy_delta = current_device_energy - last_device_energy
+    grid_energy_delta = device_energy_delta * grid_used / (pv_used + grid_used)
+    pv_energy_delta = device_energy_delta - grid_energy_delta
+else:
+    grid_energy_delta = grid_used * elapsed_time
+    pv_energy_delta = pv_used * elapsed_time
 ```
 
 Ausgabe:
