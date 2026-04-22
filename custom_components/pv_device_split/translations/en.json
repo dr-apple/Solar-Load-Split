@@ -31,7 +31,8 @@
         "description": "Discovered device: {device_name}\nEntity: {device_entity}\n\nCheck the suggestion and adjust it if needed.",
         "data": {
           "name": "Name",
-          "device_power": "Device power sensor"
+          "device_power": "Device power sensor",
+          "device_energy": "Device energy sensor (optional)"
         }
       },
       "manual_device": {
@@ -40,6 +41,7 @@
         "data": {
           "name": "Name",
           "device_power": "Device power sensor",
+          "device_energy": "Device energy sensor (optional)",
           "grid_power": "Grid import/export power sensor",
           "invert_grid": "Invert grid sign",
           "grid_buffer_seconds": "Grid time buffer",
@@ -60,6 +62,7 @@
         "data": {
           "name": "Name",
           "device_power": "Device power sensor",
+          "device_energy": "Device energy sensor (optional)",
           "grid_power": "Grid import/export power sensor",
           "invert_grid": "Invert grid sign",
           "enable_discovery": "Enable automatic discovery",

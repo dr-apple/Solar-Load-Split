@@ -35,6 +35,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CONF_DEVICE_ENERGY,
     CONF_DEVICE_POWER,
     CONF_GRID_BUFFER_SECONDS,
     CONF_GRID_DEADBAND_WATTS,
@@ -234,6 +235,7 @@ class PVDeviceSplitRuntime:
         self.entry = entry
         self.name = entry.data.get(CONF_NAME, DEFAULT_NAME)
         self.device_power_entity = entry.data[CONF_DEVICE_POWER]
+        self.device_energy_entity = entry.data.get(CONF_DEVICE_ENERGY)
         self.grid_power_entity = entry.data[CONF_GRID_POWER]
         self.invert_grid = entry.data.get(CONF_INVERT_GRID, False)
         self.grid_buffer_seconds = max(
@@ -254,6 +256,7 @@ class PVDeviceSplitRuntime:
         self._pending_grid_since: datetime | None = None
         self.pv_energy_kwh = 0.0
         self.grid_energy_kwh = 0.0
+        self._last_device_energy_kwh: float | None = None
         self.period_energy_kwh: dict[str, float] = {
             key: 0.0 for key in PERIOD_SENSOR_KEYS
         }
@@ -287,9 +290,12 @@ class PVDeviceSplitRuntime:
     async def async_start(self) -> None:
         """Start tracking source entity state changes."""
         self._update(dt_util.utcnow())
+        tracked_entities = [self.device_power_entity, self.grid_power_entity]
+        if self.device_energy_entity is not None:
+            tracked_entities.append(self.device_energy_entity)
         self._unsub_state = async_track_state_change_event(
             self.hass,
-            [self.device_power_entity, self.grid_power_entity],
+            tracked_entities,
             self._async_source_state_changed,
         )
         self._unsub_time = async_track_time_interval(
@@ -329,6 +335,7 @@ class PVDeviceSplitRuntime:
     def _update(self, now: datetime) -> None:
         """Update power and energy values."""
         device_power_w = _state_as_power_watts(self.hass, self.device_power_entity)
+        device_energy_kwh = _state_as_energy_kwh(self.hass, self.device_energy_entity)
         grid_power_w = _state_as_power_watts(self.hass, self.grid_power_entity)
 
         if device_power_w is None or grid_power_w is None:
@@ -343,19 +350,66 @@ class PVDeviceSplitRuntime:
             grid_power_w *= -1
         grid_power_w = self._apply_grid_deadband(grid_power_w)
         grid_power_w = self._buffered_grid_power(now, grid_power_w)
+        current_powers = self._calculate(device_power_w, grid_power_w)
 
         if self.last_update is not None:
             self._reset_periods_if_needed(now)
-            elapsed_hours = max((now - self.last_update).total_seconds(), 0.0) / 3600
-            self.pv_energy_kwh += self.powers.pv_power_kw * elapsed_hours
-            self.grid_energy_kwh += self.powers.grid_power_kw * elapsed_hours
-            self._add_period_energy("pv", self.powers.pv_power_kw, elapsed_hours)
-            self._add_period_energy("grid", self.powers.grid_power_kw, elapsed_hours)
+            if not self._apply_device_energy_delta(device_energy_kwh, current_powers):
+                elapsed_hours = max(
+                    (now - self.last_update).total_seconds(),
+                    0.0,
+                ) / 3600
+                self.pv_energy_kwh += self.powers.pv_power_kw * elapsed_hours
+                self.grid_energy_kwh += self.powers.grid_power_kw * elapsed_hours
+                self._add_period_energy("pv", self.powers.pv_power_kw, elapsed_hours)
+                self._add_period_energy(
+                    "grid",
+                    self.powers.grid_power_kw,
+                    elapsed_hours,
+                )
         else:
             self._reset_periods_if_needed(now)
 
         self.last_update = now
-        self.powers = self._calculate(device_power_w, grid_power_w)
+        self.powers = current_powers
+
+    @callback
+    def _apply_device_energy_delta(
+        self,
+        device_energy_kwh: float | None,
+        current_powers: SplitPower,
+    ) -> bool:
+        """Apply the true device energy delta when an energy sensor is available."""
+        if device_energy_kwh is None:
+            self._last_device_energy_kwh = None
+            return False
+
+        if self._last_device_energy_kwh is None:
+            self._last_device_energy_kwh = device_energy_kwh
+            return True
+
+        delta_kwh = device_energy_kwh - self._last_device_energy_kwh
+        self._last_device_energy_kwh = device_energy_kwh
+
+        if delta_kwh <= 0:
+            return True
+
+        total_power_kw = current_powers.pv_power_kw + current_powers.grid_power_kw
+        if total_power_kw <= 0:
+            self.pv_energy_kwh += delta_kwh
+            self._add_period_energy_delta("pv", delta_kwh)
+            return True
+
+        grid_share = current_powers.grid_power_kw / total_power_kw
+        pv_share = current_powers.pv_power_kw / total_power_kw
+        grid_delta_kwh = delta_kwh * grid_share
+        pv_delta_kwh = delta_kwh * pv_share
+
+        self.pv_energy_kwh += pv_delta_kwh
+        self.grid_energy_kwh += grid_delta_kwh
+        self._add_period_energy_delta("pv", pv_delta_kwh)
+        self._add_period_energy_delta("grid", grid_delta_kwh)
+        return True
 
     @callback
     def _apply_grid_deadband(self, grid_power_w: float) -> float:
@@ -464,6 +518,13 @@ class PVDeviceSplitRuntime:
         for key, (key_source, _) in PERIOD_SENSOR_KEYS.items():
             if key_source == source:
                 self.period_energy_kwh[key] += power_kw * elapsed_hours
+
+    @callback
+    def _add_period_energy_delta(self, source: str, delta_kwh: float) -> None:
+        """Add a known energy delta to the matching period counters."""
+        for key, (key_source, _) in PERIOD_SENSOR_KEYS.items():
+            if key_source == source:
+                self.period_energy_kwh[key] += delta_kwh
 
 
 async def async_setup_entry(
@@ -614,6 +675,30 @@ def _state_as_power_watts(hass: HomeAssistant, entity_id: str) -> float | None:
         return value * 1000
 
     return value
+
+
+def _state_as_energy_kwh(hass: HomeAssistant, entity_id: str | None) -> float | None:
+    """Return an entity energy state in kWh."""
+    if entity_id is None:
+        return None
+
+    state = hass.states.get(entity_id)
+    if state is None:
+        return None
+
+    try:
+        value = float(state.state)
+    except (TypeError, ValueError):
+        return None
+
+    unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)
+    normalized = str(unit).casefold()
+    if unit == UnitOfEnergy.WATT_HOUR or normalized == "wh":
+        return value / 1000
+    if unit == UnitOfEnergy.KILO_WATT_HOUR or normalized == "kwh":
+        return value
+
+    return None
 
 
 def _localized_entity_name(

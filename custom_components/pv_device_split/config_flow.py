@@ -12,6 +12,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from .const import (
+    CONF_DEVICE_ENERGY,
     CONF_DEVICE_POWER,
     CONF_ENABLE_DISCOVERY,
     CONF_GRID_BUFFER_SECONDS,
@@ -182,6 +183,7 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data={
                 CONF_NAME: user_input.get(CONF_NAME, DEFAULT_NAME),
                 CONF_DEVICE_POWER: user_input[CONF_DEVICE_POWER],
+                CONF_DEVICE_ENERGY: user_input.get(CONF_DEVICE_ENERGY),
                 CONF_GRID_POWER: user_input[CONF_GRID_POWER],
                 CONF_INVERT_GRID: user_input.get(CONF_INVERT_GRID, False),
                 CONF_GRID_BUFFER_SECONDS: user_input.get(
@@ -265,6 +267,12 @@ def _discovery_schema(defaults: dict[str, Any]) -> vol.Schema:
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="sensor")
             ),
+            vol.Optional(
+                CONF_DEVICE_ENERGY,
+                default=defaults.get(CONF_DEVICE_ENERGY, vol.UNDEFINED),
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
         }
     )
 
@@ -278,6 +286,12 @@ def _manual_device_schema(defaults: dict[str, Any]) -> vol.Schema:
             default=DEFAULT_NAME,
         ): selector.TextSelector(),
         vol.Required(CONF_DEVICE_POWER): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain="sensor")
+        ),
+        vol.Optional(
+            CONF_DEVICE_ENERGY,
+            default=defaults.get(CONF_DEVICE_ENERGY, vol.UNDEFINED),
+        ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="sensor")
         ),
         vol.Required(
@@ -461,6 +475,12 @@ def _options_schema(defaults: dict[str, Any]) -> vol.Schema:
             vol.Required(
                 CONF_DEVICE_POWER,
                 default=defaults.get(CONF_DEVICE_POWER, vol.UNDEFINED),
+            )
+        ] = selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor"))
+        schema[
+            vol.Optional(
+                CONF_DEVICE_ENERGY,
+                default=defaults.get(CONF_DEVICE_ENERGY, vol.UNDEFINED),
             )
         ] = selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor"))
 

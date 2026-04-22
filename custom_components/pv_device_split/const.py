@@ -5,6 +5,7 @@ from __future__ import annotations
 DOMAIN = "pv_device_split"
 
 CONF_DEVICE_POWER = "device_power"
+CONF_DEVICE_ENERGY = "device_energy"
 CONF_GRID_POWER = "grid_power"
 CONF_INVERT_GRID = "invert_grid"
 CONF_ENABLE_DISCOVERY = "enable_discovery"
