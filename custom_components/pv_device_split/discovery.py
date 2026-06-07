@@ -54,7 +54,7 @@ class PowerCandidate:
 @callback
 def async_schedule_power_discovery(hass: HomeAssistant) -> None:
     """Schedule a scan for useful power sensors."""
-    hass.async_create_task(_async_discover_power_pair(hass))
+    hass.create_task(_async_discover_power_pair(hass))
 
 
 @callback

@@ -411,7 +411,7 @@ class PVDeviceSplitOptionsFlow(config_entries.OptionsFlow):
                 title=data.get(CONF_NAME, DEFAULT_NAME),
                 data=data,
             )
-            self.hass.async_create_task(
+            self.hass.create_task(
                 self.hass.config_entries.async_reload(self._config_entry.entry_id)
             )
             return self.async_create_entry(title="", data={})
