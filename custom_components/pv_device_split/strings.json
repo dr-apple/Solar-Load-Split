@@ -55,6 +55,9 @@
     }
   },
   "options": {
+    "error": {
+      "already_configured": "Dieses Geräte- und Netzsensor-Paar ist bereits eingerichtet."
+    },
     "step": {
       "init": {
         "title": "Solar Load Split konfigurieren",
@@ -75,40 +78,40 @@
   "entity": {
     "sensor": {
       "pv_power": {
-        "name": "{device_name} PV Leistung"
+        "name": "PV Leistung"
       },
       "grid_power": {
-        "name": "{device_name} Netz Leistung"
+        "name": "Netz Leistung"
       },
       "pv_energy": {
-        "name": "{device_name} PV Energie"
+        "name": "PV Energie"
       },
       "grid_energy": {
-        "name": "{device_name} Netz Energie"
+        "name": "Netz Energie"
       },
       "pv_energy_daily": {
-        "name": "{device_name} PV Tagesenergie"
+        "name": "PV Tagesenergie"
       },
       "grid_energy_daily": {
-        "name": "{device_name} Netz Tagesenergie"
+        "name": "Netz Tagesenergie"
       },
       "pv_energy_weekly": {
-        "name": "{device_name} PV Wochenenergie"
+        "name": "PV Wochenenergie"
       },
       "grid_energy_weekly": {
-        "name": "{device_name} Netz Wochenenergie"
+        "name": "Netz Wochenenergie"
       },
       "pv_energy_monthly": {
-        "name": "{device_name} PV Monatsenergie"
+        "name": "PV Monatsenergie"
       },
       "grid_energy_monthly": {
-        "name": "{device_name} Netz Monatsenergie"
+        "name": "Netz Monatsenergie"
       },
       "pv_energy_yearly": {
-        "name": "{device_name} PV Jahresenergie"
+        "name": "PV Jahresenergie"
       },
       "grid_energy_yearly": {
-        "name": "{device_name} Netz Jahresenergie"
+        "name": "Netz Jahresenergie"
       }
     }
   }

@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
+import logging
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
-from dataclasses import replace
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from enum import StrEnum
-import logging
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -24,9 +23,9 @@ from homeassistant.const import (
     UnitOfPower,
 )
 from homeassistant.core import Event, HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.event import (
     async_track_state_change_event,
     async_track_time_interval,
@@ -84,7 +83,7 @@ PERIODS = ("day", "week", "month", "year")
 SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         key=SplitSensorKey.PV_POWER,
-        name="PV Power",
+        translation_key=SplitSensorKey.PV_POWER,
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
@@ -92,7 +91,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.GRID_POWER,
-        name="Grid Power",
+        translation_key=SplitSensorKey.GRID_POWER,
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
@@ -100,7 +99,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.PV_ENERGY,
-        name="PV Energy",
+        translation_key=SplitSensorKey.PV_ENERGY,
         icon="mdi:solar-power",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -109,7 +108,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.GRID_ENERGY,
-        name="Grid Energy",
+        translation_key=SplitSensorKey.GRID_ENERGY,
         icon="mdi:transmission-tower",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -118,7 +117,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.PV_ENERGY_DAILY,
-        name="PV Daily Energy",
+        translation_key=SplitSensorKey.PV_ENERGY_DAILY,
         icon="mdi:solar-power",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -127,7 +126,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.GRID_ENERGY_DAILY,
-        name="Grid Daily Energy",
+        translation_key=SplitSensorKey.GRID_ENERGY_DAILY,
         icon="mdi:transmission-tower",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -136,7 +135,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.PV_ENERGY_WEEKLY,
-        name="PV Weekly Energy",
+        translation_key=SplitSensorKey.PV_ENERGY_WEEKLY,
         icon="mdi:solar-power",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -145,7 +144,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.GRID_ENERGY_WEEKLY,
-        name="Grid Weekly Energy",
+        translation_key=SplitSensorKey.GRID_ENERGY_WEEKLY,
         icon="mdi:transmission-tower",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -154,7 +153,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.PV_ENERGY_MONTHLY,
-        name="PV Monthly Energy",
+        translation_key=SplitSensorKey.PV_ENERGY_MONTHLY,
         icon="mdi:solar-power",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -163,7 +162,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.GRID_ENERGY_MONTHLY,
-        name="Grid Monthly Energy",
+        translation_key=SplitSensorKey.GRID_ENERGY_MONTHLY,
         icon="mdi:transmission-tower",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -172,7 +171,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.PV_ENERGY_YEARLY,
-        name="PV Yearly Energy",
+        translation_key=SplitSensorKey.PV_ENERGY_YEARLY,
         icon="mdi:solar-power",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -181,7 +180,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=SplitSensorKey.GRID_ENERGY_YEARLY,
-        name="Grid Yearly Energy",
+        translation_key=SplitSensorKey.GRID_ENERGY_YEARLY,
         icon="mdi:transmission-tower",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -190,7 +189,7 @@ SENSOR_DESCRIPTIONS: tuple[SensorEntityDescription, ...] = (
     ),
 )
 
-SHORT_ENTITY_NAMES = (
+LEGACY_ENTITY_NAME_SUFFIXES = (
     "PV Power",
     "Grid Power",
     "PV Energy",
@@ -257,9 +256,7 @@ class PVDeviceSplitRuntime:
         self.pv_energy_kwh = 0.0
         self.grid_energy_kwh = 0.0
         self._last_device_energy_kwh: float | None = None
-        self.period_energy_kwh: dict[str, float] = {
-            key: 0.0 for key in PERIOD_SENSOR_KEYS
-        }
+        self.period_energy_kwh: dict[str, float] = {key: 0.0 for key in PERIOD_SENSOR_KEYS}
         self.period_markers: dict[str, str] = {}
         self.powers = SplitPower(0.0, 0.0)
         self.last_update: datetime | None = None
@@ -355,10 +352,13 @@ class PVDeviceSplitRuntime:
         if self.last_update is not None:
             self._reset_periods_if_needed(now)
             if not self._apply_device_energy_delta(device_energy_kwh, current_powers):
-                elapsed_hours = max(
-                    (now - self.last_update).total_seconds(),
-                    0.0,
-                ) / 3600
+                elapsed_hours = (
+                    max(
+                        (now - self.last_update).total_seconds(),
+                        0.0,
+                    )
+                    / 3600
+                )
                 self.pv_energy_kwh += self.powers.pv_power_kw * elapsed_hours
                 self.grid_energy_kwh += self.powers.grid_power_kw * elapsed_hours
                 self._add_period_energy("pv", self.powers.pv_power_kw, elapsed_hours)
@@ -453,8 +453,7 @@ class PVDeviceSplitRuntime:
 
         if (
             self._pending_grid_since is not None
-            and (now - self._pending_grid_since).total_seconds()
-            >= self.grid_buffer_seconds
+            and (now - self._pending_grid_since).total_seconds() >= self.grid_buffer_seconds
         ):
             self._stable_grid_is_export = grid_is_export
             self._pending_grid_is_export = None
@@ -530,7 +529,7 @@ class PVDeviceSplitRuntime:
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up Solar Load Split sensors from a config entry."""
     runtime = PVDeviceSplitRuntime(hass, entry)
@@ -539,15 +538,15 @@ async def async_setup_entry(
         PVDeviceSplitSensor(runtime, description) for description in SENSOR_DESCRIPTIONS
     ]
 
-    async_add_entities(entities)
     await runtime.async_start()
+    async_add_entities(entities)
     entry.async_on_unload(runtime.stop)
 
 
 class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
     """Solar Load Split sensor."""
 
-    _attr_has_entity_name = False
+    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -556,16 +555,7 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
     ) -> None:
         """Initialize the sensor."""
         self.runtime = runtime
-        self.entity_description = replace(
-            description,
-            name=_localized_entity_name(
-                runtime.hass.config.language,
-                runtime.name,
-                description.key,
-            ),
-        )
-        self._attr_name = self.entity_description.name
-        self._full_name = self.entity_description.name
+        self.entity_description = description
         self._attr_unique_id = f"{runtime.entry.entry_id}_{description.key}"
         self._attr_device_info = runtime.device_info
         self._attr_native_value: float | None = None
@@ -581,55 +571,60 @@ class PVDeviceSplitSensor(SensorEntity, RestoreEntity):
     async def async_added_to_hass(self) -> None:
         """Restore energy totals and subscribe to runtime updates."""
         await super().async_added_to_hass()
-        self._async_update_registry_name()
+        self._async_migrate_legacy_registry_name()
 
-        if self.entity_description.key in (
-            SplitSensorKey.PV_ENERGY,
-            SplitSensorKey.GRID_ENERGY,
-            *PERIOD_SENSOR_KEYS,
+        if (
+            self.entity_description.key
+            in (
+                SplitSensorKey.PV_ENERGY,
+                SplitSensorKey.GRID_ENERGY,
+                *PERIOD_SENSOR_KEYS,
+            )
+            and (last_state := await self.async_get_last_state()) is not None
         ):
-            if (last_state := await self.async_get_last_state()) is not None:
-                try:
-                    value = float(last_state.state)
-                except (TypeError, ValueError):
-                    _LOGGER.debug(
-                        "Could not restore %s from state %s",
-                        self.entity_description.key,
-                        last_state.state,
-                    )
+            try:
+                value = float(last_state.state)
+            except (TypeError, ValueError):
+                _LOGGER.debug(
+                    "Could not restore %s from state %s",
+                    self.entity_description.key,
+                    last_state.state,
+                )
+            else:
+                if self.entity_description.key == SplitSensorKey.PV_ENERGY:
+                    self.runtime.pv_energy_kwh = value
+                elif self.entity_description.key == SplitSensorKey.GRID_ENERGY:
+                    self.runtime.grid_energy_kwh = value
                 else:
-                    if self.entity_description.key == SplitSensorKey.PV_ENERGY:
-                        self.runtime.pv_energy_kwh = value
-                    elif self.entity_description.key == SplitSensorKey.GRID_ENERGY:
-                        self.runtime.grid_energy_kwh = value
-                    else:
-                        self.runtime.restore_period_energy(
-                            self.entity_description.key,
-                            value,
-                            last_state.last_updated,
-                        )
+                    self.runtime.restore_period_energy(
+                        self.entity_description.key,
+                        value,
+                        last_state.last_updated,
+                    )
 
         self._update_native_value()
         self._remove_listener = self.runtime.add_listener(self._handle_runtime_update)
 
     @callback
-    def _async_update_registry_name(self) -> None:
-        """Update old registry names from previous versions."""
+    def _async_migrate_legacy_registry_name(self) -> None:
+        """Clear only names that an older version generated automatically."""
         registry = er.async_get(self.hass)
         entity_entry = registry.async_get(self.entity_id)
         if entity_entry is None:
             return
 
-        if entity_entry.name == self._full_name:
+        legacy_names = {f"{self.runtime.name} {suffix}" for suffix in LEGACY_ENTITY_NAME_SUFFIXES}
+        if entity_entry.name not in legacy_names:
             return
 
-        registry.async_update_entity(self.entity_id, name=self._full_name)
+        registry.async_update_entity(self.entity_id, name=None)
 
     async def async_will_remove_from_hass(self) -> None:
         """Unsubscribe from runtime updates."""
         if self._remove_listener is not None:
             self._remove_listener()
             self._remove_listener = None
+        await super().async_will_remove_from_hass()
 
     @callback
     def _handle_runtime_update(self) -> None:
@@ -669,12 +664,16 @@ def _state_as_power_watts(hass: HomeAssistant, entity_id: str) -> float | None:
         value = float(state.state)
     except (TypeError, ValueError):
         return None
+    if not math.isfinite(value):
+        return None
 
     unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)
     if unit == UnitOfPower.KILO_WATT or str(unit).casefold() == "kw":
         return value * 1000
+    if unit == UnitOfPower.WATT or str(unit).casefold() == "w":
+        return value
 
-    return value
+    return None
 
 
 def _state_as_energy_kwh(hass: HomeAssistant, entity_id: str | None) -> float | None:
@@ -690,6 +689,8 @@ def _state_as_energy_kwh(hass: HomeAssistant, entity_id: str | None) -> float | 
         value = float(state.state)
     except (TypeError, ValueError):
         return None
+    if not math.isfinite(value):
+        return None
 
     unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)
     normalized = str(unit).casefold()
@@ -699,45 +700,6 @@ def _state_as_energy_kwh(hass: HomeAssistant, entity_id: str | None) -> float | 
         return value
 
     return None
-
-
-def _localized_entity_name(
-    language: str | None,
-    device_name: str,
-    key: str,
-) -> str:
-    """Return a stable full entity name for the current Home Assistant language."""
-    german_names = {
-        SplitSensorKey.PV_POWER: "PV Leistung",
-        SplitSensorKey.GRID_POWER: "Netz Leistung",
-        SplitSensorKey.PV_ENERGY: "PV Energie",
-        SplitSensorKey.GRID_ENERGY: "Netz Energie",
-        SplitSensorKey.PV_ENERGY_DAILY: "PV Tagesenergie",
-        SplitSensorKey.GRID_ENERGY_DAILY: "Netz Tagesenergie",
-        SplitSensorKey.PV_ENERGY_WEEKLY: "PV Wochenenergie",
-        SplitSensorKey.GRID_ENERGY_WEEKLY: "Netz Wochenenergie",
-        SplitSensorKey.PV_ENERGY_MONTHLY: "PV Monatsenergie",
-        SplitSensorKey.GRID_ENERGY_MONTHLY: "Netz Monatsenergie",
-        SplitSensorKey.PV_ENERGY_YEARLY: "PV Jahresenergie",
-        SplitSensorKey.GRID_ENERGY_YEARLY: "Netz Jahresenergie",
-    }
-    english_names = {
-        SplitSensorKey.PV_POWER: "PV Power",
-        SplitSensorKey.GRID_POWER: "Grid Power",
-        SplitSensorKey.PV_ENERGY: "PV Energy",
-        SplitSensorKey.GRID_ENERGY: "Grid Energy",
-        SplitSensorKey.PV_ENERGY_DAILY: "PV Daily Energy",
-        SplitSensorKey.GRID_ENERGY_DAILY: "Grid Daily Energy",
-        SplitSensorKey.PV_ENERGY_WEEKLY: "PV Weekly Energy",
-        SplitSensorKey.GRID_ENERGY_WEEKLY: "Grid Weekly Energy",
-        SplitSensorKey.PV_ENERGY_MONTHLY: "PV Monthly Energy",
-        SplitSensorKey.GRID_ENERGY_MONTHLY: "Grid Monthly Energy",
-        SplitSensorKey.PV_ENERGY_YEARLY: "PV Yearly Energy",
-        SplitSensorKey.GRID_ENERGY_YEARLY: "Grid Yearly Energy",
-    }
-
-    names = german_names if (language or "").startswith("de") else english_names
-    return f"{device_name} {names[key]}"
 
 
 def _period_marker(timestamp: datetime, period: str) -> str:

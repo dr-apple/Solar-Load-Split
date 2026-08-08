@@ -18,9 +18,9 @@ from homeassistant.helpers.event import async_call_later
 from .const import (
     CONF_DEVICE_POWER,
     CONF_ENABLE_DISCOVERY,
-    CONF_GRID_POWER,
     CONF_GRID_BUFFER_SECONDS,
     CONF_GRID_DEADBAND_WATTS,
+    CONF_GRID_POWER,
     CONF_INVERT_GRID,
     DEFAULT_GRID_BUFFER_SECONDS,
     DEFAULT_GRID_DEADBAND_WATTS,
@@ -54,7 +54,10 @@ class PowerCandidate:
 @callback
 def async_schedule_power_discovery(hass: HomeAssistant) -> None:
     """Schedule a scan for useful power sensors."""
-    hass.create_task(_async_discover_power_pair(hass))
+    hass.async_create_task(
+        _async_discover_power_pair(hass),
+        "Discover Solar Load Split power sensors",
+    )
 
 
 @callback
