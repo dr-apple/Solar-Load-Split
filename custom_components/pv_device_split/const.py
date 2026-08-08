@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from homeassistant.const import Platform
+
 DOMAIN = "pv_device_split"
 
 CONF_DEVICE_POWER = "device_power"
@@ -16,4 +18,4 @@ DEFAULT_NAME = "Solar Load Split"
 DEFAULT_GRID_BUFFER_SECONDS = 0
 DEFAULT_GRID_DEADBAND_WATTS = 100
 
-PLATFORMS = ["sensor"]
+PLATFORMS: list[Platform] = [Platform.SENSOR]
