@@ -9,6 +9,9 @@
 
 Die Einrichtung laeuft komplett ueber die Home-Assistant-Oberflaeche. YAML ist nicht noetig.
 
+Version `1.0.1` ist mit Home Assistant `2026.8` kompatibel und gegen `2026.8.1`
+getestet.
+
 ## Was Macht Die Integration?
 
 Du richtest einmal deinen Netzbezug-/Einspeise-Leistungssensor ein. Danach kann Solar Load Split passende Geraete-Leistungssensoren erkennen oder manuell hinzufuegen. Optional kannst du pro Geraet auch einen Energiezaehler des gleichen Zwischensteckers oder Shelly auswaehlen.
@@ -251,7 +254,9 @@ Anzeige der Sensorwerte.
 - Die Integration ist HACS-kompatibel.
 - Deutsch und Englisch werden ueber Home-Assistant-Translations unterstuetzt.
 - Jeder Split-Eintrag hat stabile Unique IDs.
-- Bestehende Entitaetsnamen werden von Home Assistant im Entity Registry gespeichert. Wenn du Namen nach einem Update testen willst, loesche den betroffenen Eintrag und fuege ihn neu hinzu oder setze die Namen manuell zurueck.
+- Eigene Entitaetsnamen bleiben bei Updates erhalten. Alte automatisch erzeugte Namen
+  werden einmalig auf das aktuelle Home-Assistant-Uebersetzungssystem migriert; Entity-IDs
+  und Automationen bleiben dabei unveraendert.
 
 ## English Short Version
 
