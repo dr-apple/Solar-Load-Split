@@ -63,12 +63,13 @@ def async_schedule_power_discovery(hass: HomeAssistant) -> None:
 @callback
 def async_schedule_power_discovery_retries(hass: HomeAssistant) -> None:
     """Schedule several scans while Home Assistant finishes restoring states."""
+
+    @callback
+    def _schedule_retry(_now: object) -> None:
+        async_schedule_power_discovery(hass)
+
     for delay in (5, 30, 120):
-        async_call_later(
-            hass,
-            delay,
-            lambda now: async_schedule_power_discovery(hass),
-        )
+        async_call_later(hass, delay, _schedule_retry)
 
 
 async def _async_discover_power_pair(hass: HomeAssistant) -> None:
