@@ -28,7 +28,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = entry.data
 
     async_schedule_power_discovery(hass)
-    async_schedule_power_discovery_retries(hass)
 
     if CONF_DEVICE_POWER not in entry.data:
         return True

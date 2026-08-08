@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
@@ -84,9 +83,7 @@ class PVDeviceSplitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Manually add a device power sensor."""
         grid_source_entries = _grid_source_entries(self.hass)
         if user_input is not None:
-            return await self._async_create_split_entry(
-                _with_grid_defaults(self.hass, user_input)
-            )
+            return await self._async_create_split_entry(_with_grid_defaults(self.hass, user_input))
 
         return self.async_show_form(
             step_id="manual_device",
@@ -211,9 +208,7 @@ def _hub_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
             vol.Required(
                 CONF_GRID_POWER,
                 default=defaults.get(CONF_GRID_POWER, vol.UNDEFINED),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
+            ): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             vol.Optional(
                 CONF_INVERT_GRID,
                 default=defaults.get(CONF_INVERT_GRID, False),
@@ -264,15 +259,11 @@ def _discovery_schema(defaults: dict[str, Any]) -> vol.Schema:
             vol.Required(
                 CONF_DEVICE_POWER,
                 default=defaults.get(CONF_DEVICE_POWER, vol.UNDEFINED),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
+            ): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
             vol.Optional(
                 CONF_DEVICE_ENERGY,
                 default=defaults.get(CONF_DEVICE_ENERGY, vol.UNDEFINED),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
+            ): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         }
     )
 
@@ -291,9 +282,7 @@ def _manual_device_schema(defaults: dict[str, Any]) -> vol.Schema:
         vol.Optional(
             CONF_DEVICE_ENERGY,
             default=defaults.get(CONF_DEVICE_ENERGY, vol.UNDEFINED),
-        ): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="sensor")
-        ),
+        ): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         vol.Required(
             CONF_GRID_POWER,
             default=defaults.get(CONF_GRID_POWER, vol.UNDEFINED),
@@ -406,14 +395,24 @@ class PVDeviceSplitOptionsFlow(config_entries.OptionsFlow):
                 **self._config_entry.data,
                 **user_input,
             }
+            unique_id = _entry_unique_id(data)
+            if any(
+                entry.entry_id != self._config_entry.entry_id and entry.unique_id == unique_id
+                for entry in self.hass.config_entries.async_entries(DOMAIN)
+            ):
+                return self.async_show_form(
+                    step_id="init",
+                    data_schema=_options_schema(data),
+                    errors={"base": "already_configured"},
+                )
+
             self.hass.config_entries.async_update_entry(
                 self._config_entry,
                 title=data.get(CONF_NAME, DEFAULT_NAME),
                 data=data,
+                unique_id=unique_id,
             )
-            self.hass.create_task(
-                self.hass.config_entries.async_reload(self._config_entry.entry_id)
-            )
+            self.hass.config_entries.async_schedule_reload(self._config_entry.entry_id)
             return self.async_create_entry(title="", data={})
 
         return self.async_show_form(
@@ -485,3 +484,11 @@ def _options_schema(defaults: dict[str, Any]) -> vol.Schema:
         ] = selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor"))
 
     return vol.Schema(schema)
+
+
+@callback
+def _entry_unique_id(data: dict[str, Any]) -> str:
+    """Return the unique ID matching the current entry configuration."""
+    if CONF_DEVICE_POWER in data:
+        return _pair_unique_id(data[CONF_DEVICE_POWER], data[CONF_GRID_POWER])
+    return f"grid_{data[CONF_GRID_POWER]}"
