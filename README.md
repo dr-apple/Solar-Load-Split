@@ -9,7 +9,7 @@
 
 Die Einrichtung laeuft komplett ueber die Home-Assistant-Oberflaeche. YAML ist nicht noetig.
 
-Version `1.0.1` ist mit Home Assistant `2026.8` kompatibel und gegen `2026.8.1`
+Version `1.0.2` ist mit Home Assistant `2026.8` kompatibel und gegen `2026.8.1`
 getestet.
 
 ## Was Macht Die Integration?

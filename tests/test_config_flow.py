@@ -1,6 +1,6 @@
 """Tests for the Solar Load Split config and options flows."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
@@ -14,6 +14,9 @@ from custom_components.pv_device_split.const import (
     CONF_GRID_POWER,
     CONF_INVERT_GRID,
     DOMAIN,
+)
+from custom_components.pv_device_split.discovery import (
+    async_schedule_power_discovery_retries,
 )
 
 
@@ -81,3 +84,23 @@ async def test_options_rejects_duplicate_pair(
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "already_configured"}
     assert edited.unique_id == "sensor.old_sensor.grid_power"
+
+
+def test_discovery_retries_use_callback_jobs(hass: HomeAssistant) -> None:
+    """Delayed discovery callbacks stay on Home Assistant's event loop."""
+    scheduled: list[object] = []
+
+    with patch(
+        "custom_components.pv_device_split.discovery.async_call_later",
+        side_effect=lambda _hass, _delay, action: scheduled.append(action),
+    ):
+        async_schedule_power_discovery_retries(hass)
+
+    assert len(scheduled) == 3
+    assert all(getattr(action, "_hass_callback", False) for action in scheduled)
+
+    with patch(
+        "custom_components.pv_device_split.discovery.async_schedule_power_discovery"
+    ) as discover:
+        scheduled[0](Mock())
+    discover.assert_called_once_with(hass)
