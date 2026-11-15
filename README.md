@@ -82,6 +82,10 @@ For each matching, not yet configured device a separate **Discovered** entry is 
 
 All sensors are grouped under one virtual device. The name you give when adding is used directly in the entity names.
 
+![Split device with PV and grid sensors](docs/images/ha-device-page.png)
+
+*Real screenshot from a Home Assistant installation (German UI, personal data replaced).*
+
 ## Installation
 
 ### HACS custom repository

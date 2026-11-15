@@ -92,6 +92,10 @@ Für jedes passende, noch nicht konfigurierte Gerät wird ein eigener **Entdeckt
 
 Alle Sensoren werden unter einem virtuellen Gerät gruppiert. Der Name, den du beim Hinzufügen vergibst, wird direkt in die Entitätsnamen übernommen.
 
+![Split-Gerät mit PV- und Netz-Sensoren](docs/images/ha-device-page.png)
+
+*Echter Screenshot aus einer Home-Assistant-Installation (persönliche Daten ersetzt).*
+
 ## Installation
 
 ### HACS Custom Repository
