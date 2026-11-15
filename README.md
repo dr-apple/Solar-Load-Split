@@ -1,195 +1,154 @@
 # Solar Load Split
 
-![Solar Load Split Logo](logo.svg)
+**English** · [Deutsch](README.de.md)
 
-**Solar Load Split** ist eine Home-Assistant Custom Integration fuer HACS. Sie teilt den Verbrauch eines Geraets in zwei Anteile auf:
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz)
 
-- Solar/PV-Leistung und Solar/PV-Energie
-- Netz-Leistung und Netz-Energie
+<img src="logo.svg" alt="Solar Load Split logo" width="160">
 
-Die Einrichtung laeuft komplett ueber die Home-Assistant-Oberflaeche. YAML ist nicht noetig.
+**Solar Load Split** is a Home Assistant custom integration for HACS. It splits the consumption of a device into two shares:
 
-Version `1.0.2` ist mit Home Assistant `2026.8` kompatibel und gegen `2026.8.1`
-getestet.
+- solar/PV power and solar/PV energy
+- grid power and grid energy
 
-## Was Macht Die Integration?
+Setup runs entirely in the Home Assistant UI. No YAML needed.
 
-Du richtest einmal deinen Netzbezug-/Einspeise-Leistungssensor ein. Danach kann Solar Load Split passende Geraete-Leistungssensoren erkennen oder manuell hinzufuegen. Optional kannst du pro Geraet auch einen Energiezaehler des gleichen Zwischensteckers oder Shelly auswaehlen.
+Version `1.0.2` is compatible with Home Assistant `2026.8` and tested against `2026.8.1`.
 
-Aus jedem Geraet entstehen zwoelf Sensoren:
+## What does it do?
 
-| Sensor | Einheit | Device class | State class |
+You set up your grid import/export power sensor once. Solar Load Split then discovers matching device power sensors, or you add them manually. Optionally you can pick an energy meter of the same smart plug or Shelly per device.
+
+Every device gets twelve sensors (names are created in your HA language; German shown):
+
+| Sensor | Unit | Device class | State class |
 | --- | --- | --- | --- |
-| `<Gerätename> PV Leistung` | kW | power | measurement |
-| `<Gerätename> Netz Leistung` | kW | power | measurement |
-| `<Gerätename> PV Energie` | kWh | energy | total_increasing |
-| `<Gerätename> Netz Energie` | kWh | energy | total_increasing |
-| `<Gerätename> PV Tagesenergie` | kWh | energy | total |
-| `<Gerätename> Netz Tagesenergie` | kWh | energy | total |
-| `<Gerätename> PV Wochenenergie` | kWh | energy | total |
-| `<Gerätename> Netz Wochenenergie` | kWh | energy | total |
-| `<Gerätename> PV Monatsenergie` | kWh | energy | total |
-| `<Gerätename> Netz Monatsenergie` | kWh | energy | total |
-| `<Gerätename> PV Jahresenergie` | kWh | energy | total |
-| `<Gerätename> Netz Jahresenergie` | kWh | energy | total |
+| `<device name> PV Leistung` (PV power) | kW | power | measurement |
+| `<device name> Netz Leistung` (grid power) | kW | power | measurement |
+| `<device name> PV Energie` (PV energy) | kWh | energy | total_increasing |
+| `<device name> Netz Energie` (grid energy) | kWh | energy | total_increasing |
+| `<device name> PV Tagesenergie` / `Netz Tagesenergie` (daily) | kWh | energy | total |
+| `<device name> PV Wochenenergie` / `Netz Wochenenergie` (weekly) | kWh | energy | total |
+| `<device name> PV Monatsenergie` / `Netz Monatsenergie` (monthly) | kWh | energy | total |
+| `<device name> PV Jahresenergie` / `Netz Jahresenergie` (yearly) | kWh | energy | total |
 
-Die kWh-Sensoren sind fuer das Home-Assistant Energy Dashboard vorbereitet:
+The kWh sensors are ready for the Home Assistant Energy dashboard:
 
 - `device_class: energy`
 - `native_unit_of_measurement: kWh`
-- Gesamtzaehler: `state_class: total_increasing`
-- Tages-/Wochen-/Monats-/Jahreszaehler: `state_class: total`
+- Total counters: `state_class: total_increasing`
+- Day/week/month/year counters: `state_class: total`
 - `last_reset = None`
 
-## Bilder Zur Einrichtung
+## How the split works
 
-### 1. Netzsensor Einmalig Einrichten
+![Device power + grid power → Solar Load Split → PV and grid sensors](docs/images/how-it-works.svg)
 
-![Basiseinrichtung mit Netzsensor](docs/images/setup-01-grid.svg)
+## Setup in pictures
 
-Der Netzsensor muss Leistung in `W` oder `kW` liefern.
+*(The setup mock-ups show the German UI.)*
 
-Nach optionaler Umkehrung gilt:
+### 1. Set up the grid sensor once
 
-- **positiv** = Netzbezug
-- **negativ** = Einspeisung
-- **innerhalb der Netz-Totzone** = PV/Akku, wird als PV gezaehlt
-- **PV/Akku-Anteil** = Geraete-Leistung minus echter Netzbezug
+![Base setup with grid sensor](docs/images/setup-01-grid.svg)
 
-Wenn dein Zaehler die Vorzeichen andersherum liefert, aktiviere **Netz-Vorzeichen umkehren**.
+The grid sensor must report power in `W` or `kW`.
 
-### 2. Entdeckte Geraete Bestaetigen
+After optional inversion:
 
-![Entdeckte Geraete](docs/images/setup-02-discovery.svg)
+- **positive** = grid import
+- **negative** = export / feed-in
+- **within the grid deadband** = PV/battery, counted as PV
+- **PV/battery share** = device power minus real grid import
 
-Solar Load Split durchsucht vorhandene `sensor`-Entitaeten nach Leistungssensoren:
+If your meter reports the signs the other way round, enable **Invert grid sign**.
+
+### 2. Confirm discovered devices
+
+![Discovered devices](docs/images/setup-02-discovery.svg)
+
+Solar Load Split scans existing `sensor` entities for power sensors:
 
 - `device_class: power`
-- oder Einheit `W` / `kW`
+- or unit `W` / `kW`
 
-Offensichtliche Netzsensoren werden als Geraetesensor uebersprungen, wenn Name oder Entity-ID typische Begriffe enthalten, zum Beispiel:
+Obvious grid sensors are skipped as device sensors when the name or entity ID contains typical terms, for example `grid`, `netz`, `meter`, `utility`, `einspeis`, `bezug`.
 
-- `grid`
-- `netz`
-- `meter`
-- `utility`
-- `einspeis`
-- `bezug`
+For each matching, not yet configured device a separate **Discovered** entry is created.
 
-Fuer jedes passende, noch nicht konfigurierte Geraet wird ein eigener **Entdeckt**-Eintrag angelegt.
+### 3. Created sensors
 
-### 3. Erzeugte Sensoren
+![Created sensors](docs/images/setup-03-entities.svg)
 
-![Erzeugte Sensoren](docs/images/setup-03-entities.svg)
-
-Alle Sensoren werden unter einem virtuellen Geraet gruppiert. Der Name, den du beim Hinzufuegen vergibst, wird direkt in die Entitaetsnamen uebernommen.
+All sensors are grouped under one virtual device. The name you give when adding is used directly in the entity names.
 
 ## Installation
 
-### HACS Custom Repository
+### HACS custom repository
 
-1. In HACS ein neues benutzerdefiniertes Repository hinzufuegen.
-2. Kategorie **Integration** auswaehlen.
-3. Repository installieren.
-4. Home Assistant neu starten.
-5. **Einstellungen > Geraete & Dienste > Integration hinzufuegen** oeffnen.
-6. **Solar Load Split** suchen und hinzufuegen.
+1. Add `https://github.com/dr-apple/Solar-Load-Split` as a custom repository in HACS.
+2. Choose category **Integration**.
+3. Install the repository.
+4. Restart Home Assistant.
+5. Open **Settings > Devices & services > Add integration**.
+6. Search for **Solar Load Split** and add it.
 
-### Manuelle Installation
+### Manual installation
 
-1. Den Ordner `custom_components/pv_device_split` nach `config/custom_components/pv_device_split` kopieren.
-2. Home Assistant neu starten.
-3. **Einstellungen > Geraete & Dienste > Integration hinzufuegen** oeffnen.
-4. **Solar Load Split** suchen und hinzufuegen.
+1. Copy `custom_components/pv_device_split` to `config/custom_components/pv_device_split`.
+2. Restart Home Assistant.
+3. Open **Settings > Devices & services > Add integration**.
+4. Search for **Solar Load Split** and add it.
 
-## Einrichtung
+## Configuration
 
-### Basis-Eintrag
+### Base entry
 
-Beim ersten Einrichten fragt Solar Load Split nach:
+On first setup Solar Load Split asks for:
 
-- `name`: Anzeigename des Basis-Eintrags
-- `grid_power`: Netzbezug-/Einspeise-Leistungssensor
-- `invert_grid`: optional, wenn dein Netzsensor die Vorzeichen andersherum liefert
-- `enable_discovery`: automatische Erkennung aktivieren oder deaktivieren, Standard ist aus
-- `grid_buffer_seconds`: zeitlicher Netzpuffer in Sekunden
-- `grid_deadband_watts`: Netz-Totzone in Watt, Standard ist `100 W`
+- `name`: display name of the base entry
+- `grid_power`: grid import/export power sensor
+- `invert_grid`: optional, if your grid sensor reports the signs the other way round
+- `enable_discovery`: enable or disable automatic discovery, default is off
+- `grid_buffer_seconds`: time buffer for the grid sign in seconds
+- `grid_deadband_watts`: grid deadband in watts, default `100 W`
 
-Dieser Basis-Eintrag erzeugt noch keine Split-Sensoren. Er speichert nur den Netzsensor, der fuer alle Geraete verwendet wird.
+This base entry doesn't create split sensors yet. It only stores the grid sensor used for all devices.
 
-Der zeitliche Netzpuffer entprellt nur den Wechsel zwischen Netzbezug und
-Einspeisung. Die aktuelle Leistungshoehe wird nicht gemittelt. Das verhindert,
-dass Solar Load Split bei kurzen Akku-/Wechselrichter-Schwankungen sofort
-zwischen Netzbezug und Einspeisung springt. `0` deaktiviert den Puffer. Standard
-ist `0` Sekunden.
+The time buffer only debounces the switch between grid import and export. The current power level is not averaged. This prevents Solar Load Split from jumping between import and export on short battery/inverter fluctuations. `0` disables the buffer (default).
 
-Die Netz-Totzone behandelt kleine Werte rund um `0 W` als PV-/Akku-Versorgung.
-Beispiel: Bei `100 W` Totzone werden `+80 W` Netzbezug oder `-50 W` Einspeisung
-nicht als echter Netzbezug gezaehlt. Das ist hilfreich, wenn ein Akku oder
-Wechselrichter den Netzanschlusspunkt regelt und der Zaehler staendig kleine
-Werte wie `9-80 W` meldet. Innerhalb der Totzone zaehlt Solar Load Split die
-aktuelle Geraete-Leistung als PV-Energie und die Netz-Energie bleibt bei `0`.
+The grid deadband treats small values around `0 W` as PV/battery supply. Example: with a `100 W` deadband, `+80 W` import or `-50 W` export are not counted as real grid import. This helps when a battery or inverter regulates the grid connection point and the meter constantly reports small values like `9-80 W`. Within the deadband the current device power counts as PV energy and grid energy stays `0`.
 
-Wichtig: Der Netzsensor zeigt den Wert am Hausanschluss **nach** dem Geraet.
-Darum wird der echte Netzanteil des Geraets aus dem positiven Netzbezug
-abgeleitet und auf die Geraete-Leistung begrenzt. Alles, was nicht durch echten
-Netzbezug gedeckt ist, wird als PV-/Akku-Anteil gezaehlt.
+Important: the grid sensor shows the value at the house connection **after** the device. The device's real grid share is therefore derived from the positive grid import and limited to the device power. Everything not covered by real grid import counts as PV/battery share.
 
-### Automatische Erkennung
+### Automatic discovery
 
-Nach dem Laden des Basis-Eintrags scannt Solar Load Split vorhandene Leistungssensoren und erstellt Vorschlaege unter **Entdeckt**.
+After the base entry is loaded, Solar Load Split scans existing power sensors and creates suggestions under **Discovered**. If **Enable automatic discovery** is off (default), no suggestions are created; manual adding still works.
 
-Wenn **Automatische Erkennung aktivieren** ausgeschaltet ist, werden keine Discovery-Vorschlaege erzeugt. Manuelles Hinzufuegen funktioniert weiterhin.
-Der Schalter ist standardmaessig ausgeschaltet.
+The scan runs at Home Assistant start, when the base entry or any Solar Load Split entry is loaded, and once more delayed after start so late sensors are found. If new power sensors appear later, reload the integration or restart Home Assistant.
 
-Der Scan laeuft:
+### Add a device manually
 
-- beim Start von Home Assistant
-- wenn der Basis-Eintrag geladen wird
-- wenn ein Solar-Load-Split-Eintrag geladen wird
-- zusaetzlich verzoegert nach dem Start, damit spaet geladene Sensoren erkannt werden
+If a sensor isn't discovered automatically:
 
-Wenn spaeter neue Leistungssensoren hinzukommen, lade die Integration neu oder starte Home Assistant neu.
+1. Open **Add integration**.
+2. Select **Solar Load Split** again.
+3. If Home Assistant shows a selection page first, choose **Set up another instance of Solar Load Split**.
+4. The **Add device manually** dialog opens directly.
+5. Select the device power sensor.
+6. Optionally select the device energy sensor of the same meter.
+7. Check or select the grid sensor if needed.
+8. Confirm.
 
-### Geraet Manuell Hinzufuegen
+The grid sensor and `invert_grid` are taken from the base entry if one is found; otherwise you can choose them in the manual dialog.
 
-Wenn ein Sensor nicht automatisch erkannt wird:
+### Change existing entries
 
-1. **Integration hinzufuegen** oeffnen.
-2. **Solar Load Split** erneut auswaehlen.
-3. Falls Home Assistant erst eine Auswahlseite zeigt, **Eine weitere Instanz von Solar Load Split einrichten** auswaehlen.
-4. Der Dialog **Geraet manuell hinzufuegen** oeffnet sich direkt.
-5. Geraete-Leistungssensor auswaehlen.
-6. Optional den Geraete-Energiesensor des gleichen Messgeraets auswaehlen.
-7. Falls noetig Netzsensor kontrollieren oder auswaehlen.
-8. Bestaetigen.
+Use **Configure** on an entry to change: name, device power sensor, device energy sensor, grid power sensor, invert grid sign, automatic discovery, time buffer, deadband. The entry reloads after saving.
 
-Der Netzsensor und `invert_grid` werden aus dem Basis-Eintrag uebernommen, wenn ein passender Eintrag erkannt wurde. Andernfalls kannst du sie im manuellen Dialog auswaehlen.
+## Calculation
 
-### Bestehende Eintraege Aendern
-
-Bereits eingerichtete Eintraege kannst du ueber **Konfigurieren** bearbeiten.
-
-Je nach Eintrag kannst du anpassen:
-
-- Name
-- Geraete-Leistungssensor
-- Geraete-Energiesensor
-- Netzbezug-/Einspeise-Leistungssensor
-- Netz-Vorzeichen umkehren
-- Automatische Erkennung aktivieren
-- Zeitlicher Netzpuffer
-- Netz-Totzone
-
-Nach dem Speichern wird der Eintrag automatisch neu geladen.
-
-## Berechnungslogik
-
-Die Aufteilung nutzt immer den Geraete-Leistungssensor und den Netzsensor.
-Wenn ein optionaler Geraete-Energiesensor vorhanden ist, werden die echten
-kWh-Deltas dieses Sensors auf PV und Netz verteilt. Das liefert die genaueste
-Summe, weil `PV + Netz` dann direkt an den echten Energiezaehler des
-Zwischensteckers oder Shelly gekoppelt ist.
+The split always uses the device power sensor and the grid sensor. If an optional device energy sensor is present, its real kWh deltas are distributed to PV and grid – this gives the most accurate total, because `PV + grid` is then tied directly to the plug's/Shelly's real energy counter.
 
 ```text
 if invert_grid:
@@ -212,16 +171,39 @@ else:
     pv_energy_delta = pv_used * elapsed_time
 ```
 
-Ausgabe:
+Output: power sensors in `kW`, energy sensors in `kWh`, rounded to 2 decimals for display (calculation runs at full precision).
 
-- Leistungssensoren in `kW`
-- Energiesensoren in `kWh`
-- Rundung auf 2 Nachkommastellen
+## Examples
 
-Intern rechnet Solar Load Split mit voller Praezision und rundet erst fuer die
-Anzeige der Sensorwerte.
+**Energy dashboard:** under *Settings → Dashboards → Energy → Individual devices* add `<device> PV Energie` and `<device> Netz Energie` – you see how much of the consumption came from the roof.
 
-## Ordnerstruktur
+**Solar share in percent** (template sensor):
+
+```yaml
+template:
+  - sensor:
+      - name: Heat pump solar share today
+        unit_of_measurement: "%"
+        state: >
+          {% set pv = states('sensor.heat_pump_pv_tagesenergie') | float(0) %}
+          {% set grid = states('sensor.heat_pump_netz_tagesenergie') | float(0) %}
+          {{ (100 * pv / (pv + grid)) | round(0) if (pv + grid) > 0 else 0 }}
+```
+
+**Savings today** (electricity price 0.32 €/kWh minus feed-in tariff 0.08 €/kWh):
+
+```yaml
+template:
+  - sensor:
+      - name: Heat pump PV savings today
+        unit_of_measurement: "€"
+        state: >
+          {{ (states('sensor.heat_pump_pv_tagesenergie') | float(0) * (0.32 - 0.08)) | round(2) }}
+```
+
+Entity IDs follow the name you give when adding the device.
+
+## Folder structure
 
 ```text
 .
@@ -248,30 +230,13 @@ Anzeige der Sensorwerte.
             └── en.json
 ```
 
-## Hinweise
+## Notes
 
-- Die Integration ist UI-only.
-- Die Integration ist HACS-kompatibel.
-- Deutsch und Englisch werden ueber Home-Assistant-Translations unterstuetzt.
-- Jeder Split-Eintrag hat stabile Unique IDs.
-- Eigene Entitaetsnamen bleiben bei Updates erhalten. Alte automatisch erzeugte Namen
-  werden einmalig auf das aktuelle Home-Assistant-Uebersetzungssystem migriert; Entity-IDs
-  und Automationen bleiben dabei unveraendert.
+- UI-only integration, HACS-compatible.
+- German and English via Home Assistant translations.
+- Every split entry has stable unique IDs.
+- Custom entity names are kept on updates. Old auto-generated names are migrated once to the current translation system; entity IDs and automations stay unchanged.
 
-## English Short Version
+## License
 
-Solar Load Split is a HACS-compatible Home Assistant custom integration. It splits one device power sensor into solar/PV usage and grid usage.
-
-Setup is UI-only:
-
-1. Add Solar Load Split once and select the grid import/export power sensor.
-2. Positive grid power means import, negative grid power means export/feed-in.
-3. Confirm discovered device power sensors or add a device manually by adding Solar Load Split again.
-4. Each device creates PV power, grid power, PV energy, and grid energy sensors.
-
-The grid sensor is assumed to measure the house connection after the device
-load. The device grid share is therefore the current positive grid import,
-limited to the device power. The remaining device power is counted as PV/battery
-share.
-
-Energy sensors use `kWh`, `device_class: energy`, `state_class: total_increasing`, and `last_reset = None`.
+MIT – see [LICENSE](LICENSE).
